@@ -3,6 +3,7 @@
 import enum
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Attack(enum.Enum):
@@ -56,7 +57,7 @@ class Sampler:
                 self.update_scores(peer_no, remote_peer_no, new_score)
 
     def update_scores(self, peer_no, remote_peer_no, score):
-        history = self.peer_data[remote_peer_no][peer_no]
+        history = self.peer_data[peer_no][remote_peer_no]
         last_score, last_confidence = history[-1]
 
         # get difference in scores
@@ -69,8 +70,11 @@ class Sampler:
             # score should move to the average of the last two scores
             new_score = (score + last_score) / 2
         else:
-            # it the difference is high, confidence will be lowered
-            new_confidence = max(0, last_confidence - 0.1)
+            if dif > 0.2:
+                # it the difference is high, confidence will be lowered
+                new_confidence = max(0, last_confidence - 0.1)
+            else:
+                new_confidence = last_confidence
             if score < last_score:
                 # if new data suggests a bad peer is good, higher priority is given to old data, to make bad reputation hard to lose
                 new_score = (score + 2 * last_score) / 3
@@ -78,4 +82,19 @@ class Sampler:
                 new_score = (score + last_score) / 2
 
         new_score, new_confidence = clean_floats(new_score, new_confidence)
-        self.peer_data[remote_peer_no][peer_no].append((new_score, new_confidence))
+        self.peer_data[peer_no][remote_peer_no].append((new_score, new_confidence))
+
+    def show_score_graphs(self, attacker_no, victim_no):
+        history = self.peer_data[victim_no][attacker_no]
+
+        score = [h[0] for h in history]
+        confidence = [h[1] for h in history]
+        timeline = list(range(0, len(history)))
+
+        plt.plot(timeline, score, color='g')
+        plt.plot(timeline, confidence, color='orange')
+        plt.ylim(-0.05, 1.05)
+        plt.xlabel('Algorithm rounds')
+        plt.ylabel('Simulated IDS output')
+        plt.title('Changes in score (green) and confidence (orange) in time')
+        plt.show()
