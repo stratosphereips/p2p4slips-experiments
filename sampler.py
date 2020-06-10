@@ -17,11 +17,11 @@ def get_score_sample(action: Attack):
     if action == Attack.Benign:
         return np.random.beta(20, 30)
     if action == Attack.GeneralAttack:
-        return np.random.beta(3, 1)
+        return np.random.beta(2.5, 1)
     if action == Attack.TargetedAttack:
         return np.random.beta(10, 1)
     if action == Attack.TargetedOnOthers:
-        return np.random.beta(3, 2)
+        return np.random.beta(3, 2.5)
 
 
 def get_diff_from_sample(sample):
