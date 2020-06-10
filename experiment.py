@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     peers = [p0, p1]
     s = Sampler(2)
-    for round in range(0, 300):
+    for round in range(0, 100):
         attacks = []
         for peer in peers:
             attacks.append(peer.make_choice(round))

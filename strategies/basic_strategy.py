@@ -10,7 +10,7 @@ def attack_all(round_no, number_of_peers):
 
 
 def attack_p1(round_no, number_of_peers):
-    if round_no < 200:
+    if round_no < 20:
         attack_plan = [Attack.TargetedOnOthers] * number_of_peers
         attack_plan[1] = Attack.TargetedAttack
     else:
