@@ -15,13 +15,31 @@ class Attack(enum.Enum):
 
 def get_score_sample(action: Attack):
     if action == Attack.Benign:
-        return np.random.beta(2, 8)
+        return np.random.beta(20, 30)
     if action == Attack.GeneralAttack:
         return np.random.beta(3, 1)
     if action == Attack.TargetedAttack:
         return np.random.beta(10, 1)
     if action == Attack.TargetedOnOthers:
-        return np.random.beta(3, 3)
+        return np.random.beta(3, 2)
+
+
+def get_diff_from_sample(sample):
+    score_dif = sample - 0.5
+    return score_dif
+
+
+def get_confidence_dif_from_score_dif_(score_dif):
+    return min(pow((2 * score_dif) + 1, 2), pow((2 * score_dif) - 1, 2)) - 0.5
+
+def get_confidence_dif_from_score_dif(score_dif, new_score):
+    a = abs(score_dif)
+    if a < 0.05:
+        if new_score > 0.5:
+            return 0.2
+        else:
+            return 0.05
+    return -2 * a
 
 
 def clean_floats(new_score, new_confidence):
@@ -53,36 +71,36 @@ class Sampler:
                 if peer_no == remote_peer_no:
                     continue
                 action = attack_matrix[remote_peer_no][peer_no]
-                new_score = get_score_sample(action)
-                self.update_scores(peer_no, remote_peer_no, new_score)
+                new_score_dif = get_score_sample(action)
+                new_score_dif = get_diff_from_sample(new_score_dif)
+                self.update_scores(peer_no, remote_peer_no, new_score_dif)
 
-    def update_scores(self, peer_no, remote_peer_no, score):
+    def update_scores(self, peer_no, remote_peer_no, score_dif):
         history = self.peer_data[peer_no][remote_peer_no]
         last_score, last_confidence = history[-1]
 
-        # get difference in scores
-        dif = abs(score - last_score)
+        if peer_no == 1 and remote_peer_no == 0:
+            # print(score_dif, real_score_dif, confidence_dif)
+            k = 3
 
-        # is the current score similar to the latest one?
-        if dif < 0.1:
-            # if yes, confidence should go up
-            new_confidence = min(1, last_confidence + 0.1)
-            # score should move to the average of the last two scores
-            new_score = (score + last_score) / 2
-        else:
-            if dif > 0.2:
-                # it the difference is high, confidence will be lowered
-                new_confidence = max(0, last_confidence - 0.1)
-            else:
-                new_confidence = last_confidence
-            if score < last_score:
-                # if new data suggests a bad peer is good, higher priority is given to old data, to make bad reputation hard to lose
-                new_score = (score + 2 * last_score) / 3
-            else:
-                new_score = (score + last_score) / 2
-
+        new_score = min(1, max(last_score + score_dif, 0))
+        real_score_dif = abs(last_score - new_score)
+        confidence_dif = get_confidence_dif_from_score_dif(real_score_dif, new_score)
+        new_confidence = min(1, max(last_confidence + confidence_dif, 0))
+        if peer_no == 1 and remote_peer_no == 0:
+            print(last_score, last_confidence, score_dif, real_score_dif, confidence_dif)
         new_score, new_confidence = clean_floats(new_score, new_confidence)
         self.peer_data[peer_no][remote_peer_no].append((new_score, new_confidence))
+
+    def show_confidence_change_characteristics(self):
+        X = list(range(-50, 50))
+        X = [x/100 for x in X]
+        Y = [get_confidence_dif_from_score_dif(x) for x in X]
+
+        plt.plot(X, Y, color='g')
+        plt.xlabel('Change in score')
+        plt.ylabel('Suggested change in confidence')
+        plt.show()
 
     def show_score_graphs(self, attacker_no, victim_no):
         history = self.peer_data[victim_no][attacker_no]

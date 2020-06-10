@@ -15,4 +15,4 @@ if __name__ == '__main__':
             attacks.append(peer.make_choice(round))
         s.process_attacks(attacks)
 
-    s.show_score_graphs(0, 1)
+    s.show_score_graphs(1, 0)
