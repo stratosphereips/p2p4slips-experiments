@@ -49,35 +49,27 @@ def clean_floats(new_score, new_confidence):
 class Sampler:
     def __init__(self, n):
         self.n = n
-        self.peer_data = []
+        self.peer_data = {}
+        self.default_data = (0.5, 0.5)
 
-        for peer_no in range(0, n):
-            peer_stats = []
-            for remote_peer_no in range(0, n):
-                history = [(0.5, 0.5)]
-                peer_stats.append(history)
-            self.peer_data.append(peer_stats)
-
-    def process_attacks(self, attack_matrix):
+    def process_attacks(self, round, attack_matrix: dict):
         """
         For each peer, recompute his current score and confidence
         :param attack_matrix: a square matrix containing enum identifiers of attacks
         :return:
         """
 
-        for peer_no in range(0, self.n):
+        for peer_name, outgoing_attacks in attack_matrix.items():
             # this is a line that tells me how everyone will treat peer with id peer_no
-            for remote_peer_no in range(0, self.n):
-                if peer_no == remote_peer_no:
+            for target_peer_name, action in outgoing_attacks.items():
+                if peer_name == target_peer_name:
                     continue
-                action = attack_matrix[remote_peer_no][peer_no]
                 new_score_dif = get_score_sample(action)
                 new_score_dif = get_diff_from_sample(new_score_dif)
-                self.update_scores(peer_no, remote_peer_no, new_score_dif)
+                self.update_scores(round, peer_name, target_peer_name, new_score_dif)
 
-    def update_scores(self, peer_no, remote_peer_no, score_dif):
-        history = self.peer_data[peer_no][remote_peer_no]
-        last_score, last_confidence = history[-1]
+    def update_scores(self, round, peer_no, remote_peer_no, score_dif):
+        last_score, last_confidence = self.get_last_score_confidence(peer_no, remote_peer_no)
 
         if peer_no == 1 and remote_peer_no == 0:
             # print(score_dif, real_score_dif, confidence_dif)
@@ -90,7 +82,30 @@ class Sampler:
         if peer_no == 1 and remote_peer_no == 0:
             print(last_score, last_confidence, score_dif, real_score_dif, confidence_dif)
         new_score, new_confidence = clean_floats(new_score, new_confidence)
-        self.peer_data[peer_no][remote_peer_no].append((new_score, new_confidence))
+        self.set_score_confidence(round, peer_no, remote_peer_no, new_score, new_confidence)
+
+    def set_score_confidence(self, round, peer_name, attacker_name, score, confidence):
+        if peer_name not in self.peer_data:
+            self.peer_data[peer_name] = {}
+
+        if attacker_name not in self.peer_data[peer_name]:
+            self.peer_data[peer_name][attacker_name] = {"rounds": [], "data": []}
+
+        self.peer_data[peer_name][attacker_name]["rounds"].append(round)
+        self.peer_data[peer_name][attacker_name]["data"].append((score, confidence))
+
+    def get_score_confidence_history(self, peer_name, attacker_name):
+        try:
+            history = self.peer_data[peer_name][attacker_name]
+            rounds = history["rounds"]
+            data = history["data"]
+            return rounds, data
+        except:
+            return [-1], [(0.5, 0.5)]
+
+    def get_last_score_confidence(self, peer_name, attacker_name):
+        rounds, data = self.get_score_confidence_history(peer_name, attacker_name)
+        return data[-1]
 
     def show_confidence_change_characteristics(self):
         X = list(range(-50, 50))
@@ -102,12 +117,11 @@ class Sampler:
         plt.ylabel('Suggested change in confidence')
         plt.show()
 
-    def show_score_graphs(self, attacker_no, victim_no):
-        history = self.peer_data[victim_no][attacker_no]
+    def show_score_graphs(self, victim_name, attacker_name):
+        timeline, data = self.get_score_confidence_history(victim_name, attacker_name)
 
-        score = [h[0] for h in history]
-        confidence = [h[1] for h in history]
-        timeline = list(range(0, len(history)))
+        score = [h[0] for h in data]
+        confidence = [h[1] for h in data]
 
         plt.plot(timeline, score, color='g')
         plt.plot(timeline, confidence, color='orange')

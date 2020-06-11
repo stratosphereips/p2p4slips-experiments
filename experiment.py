@@ -23,9 +23,10 @@ if __name__ == '__main__':
     peer_names = [p0.name, p1.name, p2.name, p3.name]
     s = Sampler(4)
     for round in range(0, 100):
-        attacks = []
+        attacks = {}
         for peer in peers:
-            attacks.append(peer.make_choice(round, peer_names))
-        s.process_attacks(attacks)
+            attacks[peer.name] = peer.make_choice(round, peer_names)
+        s.process_attacks(round, attacks)
 
-    s.show_score_graphs(0, 3)
+    # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
+    s.show_score_graphs("good_guy_1", "attacker_targeting_p0")
