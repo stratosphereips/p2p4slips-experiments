@@ -11,9 +11,11 @@ from modules.p2ptrust.trustdb import TrustDB
 from modules.p2ptrust.reputation_model import ReputationModel
 from modules.p2ptrust.printer import Printer
 
+from strategies.basic_strategy import Strategy
+
 class PeerWithStrategy:
 
-    def __init__(self, printer: Printer, peer_identifier: str, strategy):
+    def __init__(self, printer: Printer, peer_identifier: str, strategy: Strategy):
         self.printer = printer
         self.name = peer_identifier
         self.strategy = strategy
@@ -22,7 +24,13 @@ class PeerWithStrategy:
         self.trustDB = TrustDB(self.db_file, self.printer, drop_tables_on_startup=True)
         self.reputationModel = ReputationModel(self.printer, self.trustDB, None)
 
+    def on_round_start(self, round: int):
+        self.strategy.on_round_start(round)
+
     def make_choice(self, round, peer_names):
-        return self.strategy(round, peer_names)
+        return self.strategy.choose_round_behavior(round, peer_names)
+
+    def on_round_end(self, round: int):
+        self.strategy.on_round_end(round)
 
 
