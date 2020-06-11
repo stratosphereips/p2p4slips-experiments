@@ -59,30 +59,27 @@ class Sampler:
         :return:
         """
 
-        for peer_name, outgoing_attacks in attack_matrix.items():
+        for remote_peer_name, outgoing_attacks in attack_matrix.items():
             # this is a line that tells me how everyone will treat peer with id peer_no
-            for target_peer_name, action in outgoing_attacks.items():
-                if peer_name == target_peer_name:
+            for peer_name, action in outgoing_attacks.items():
+                if remote_peer_name == peer_name:
                     continue
+
                 new_score_dif = get_score_sample(action)
                 new_score_dif = get_diff_from_sample(new_score_dif)
-                self.update_scores(round, peer_name, target_peer_name, new_score_dif)
+                self.update_scores(round, peer_name, remote_peer_name, new_score_dif)
 
-    def update_scores(self, round, peer_no, remote_peer_no, score_dif):
-        last_score, last_confidence = self.get_last_score_confidence(peer_no, remote_peer_no)
-
-        if peer_no == 1 and remote_peer_no == 0:
-            # print(score_dif, real_score_dif, confidence_dif)
-            k = 3
+    def update_scores(self, round, peer_name, remote_peer_name, score_dif):
+        last_score, last_confidence = self.get_last_score_confidence(peer_name, remote_peer_name)
 
         new_score = min(1, max(last_score + score_dif, 0))
         real_score_dif = abs(last_score - new_score)
         confidence_dif = get_confidence_dif_from_score_dif(real_score_dif, new_score)
         new_confidence = min(1, max(last_confidence + confidence_dif, 0))
-        if peer_no == 1 and remote_peer_no == 0:
+        if peer_name == 1 and remote_peer_name == 0:
             print(last_score, last_confidence, score_dif, real_score_dif, confidence_dif)
         new_score, new_confidence = clean_floats(new_score, new_confidence)
-        self.set_score_confidence(round, peer_no, remote_peer_no, new_score, new_confidence)
+        self.set_score_confidence(round, peer_name, remote_peer_name, new_score, new_confidence)
 
     def set_score_confidence(self, round, peer_name, attacker_name, score, confidence):
         if peer_name not in self.peer_data:
