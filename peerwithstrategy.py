@@ -17,27 +17,24 @@ from modules.p2ptrust.printer import Printer
 from strategies.basic_strategy import Strategy
 
 
-class PeerWithStrategy:
+class PeerWithStrategy(Trust):
 
-    def __init__(self, output_queue, printer: Printer, peer_identifier: str, strategy: Strategy, config: ConfigParser, trust_params: dict):
-        self.Trust = Trust(output_queue,
-                           config,
-                           pigeon_port=trust_params["pigeon_port"],
-                           rename_with_port=True,
-                           slips_update_channel="ip_info_change",
-                           p2p_data_request_channel="p2p_data_request",
-                           gopy_channel="p2p_gopy",
-                           pygo_channel="p2p_pygo",
-                           pigeon_logfile="",
-                           start_pigeon=False)
+    def __init__(self, output_queue, peer_identifier: str, strategy: Strategy, config: ConfigParser,
+                 trust_params: dict):
+        self.parent = super()
+        self.parent.__init__(output_queue,
+                         config,
+                         pigeon_port=trust_params["pigeon_port"],
+                         rename_with_port=True,
+                         slips_update_channel="ip_info_change",
+                         p2p_data_request_channel="p2p_data_request",
+                         gopy_channel="p2p_gopy",
+                         pygo_channel="p2p_pygo",
+                         pigeon_logfile="",
+                         start_pigeon=False)
 
-        self.printer = printer
         self.name = peer_identifier
         self.strategy = strategy
-        self.db_file = os.path.abspath("databases/" + peer_identifier + ".sql")
-        print(os.path.abspath(self.db_file))
-        self.trustDB = TrustDB(self.db_file, self.printer, drop_tables_on_startup=True)
-        self.reputationModel = ReputationModel(self.printer, self.trustDB, None)
 
     def on_round_start(self, round: int):
         self.strategy.on_round_start(round)
@@ -47,3 +44,11 @@ class PeerWithStrategy:
 
     def on_round_end(self, round: int):
         self.strategy.on_round_end(round)
+
+    def handle_update(self, ip_address: str) -> None:
+        print("handle_update was called")
+        pass
+
+    def handle_data_request(self, message_data: str) -> None:
+        print("handle_update was called")
+        pass
