@@ -7,6 +7,7 @@ from experimental_printer import Printer
 from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
 from sampler import Sampler, Attack
+from slips_hub import SlipsHub
 from strategies.basic_strategy import StrategyAttackAll, StrategyAttackTarget, StrategyBeNice
 
 # make imports from parent directory possible
@@ -56,12 +57,14 @@ if __name__ == '__main__':
         ipdb.set_peer_object(p.name, p)
         ipdb.set_custom_ip(p.name, p.ipaddress)
 
-    s = Sampler(4)
+    sampler = Sampler()
+    hub = SlipsHub(sampler, ipdb)
+
     for round in range(0, 100):
         attacks = {}
         for peer in peers:
             attacks[peer.ipaddress] = peer.make_choice(round, peer_names)
-        s.process_attacks(round, attacks)
+        hub.run_detections(round, attacks)
 
     # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
-    s.show_score_graphs("good_guy_1", "all_attacker")
+    # s.show_score_graphs("good_guy_1", "all_attacker")

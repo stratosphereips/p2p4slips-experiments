@@ -47,8 +47,7 @@ def clean_floats(new_score, new_confidence):
 
 
 class Sampler:
-    def __init__(self, n):
-        self.n = n
+    def __init__(self):
         self.peer_data = {}
         self.default_data = (0.5, 0.5)
 

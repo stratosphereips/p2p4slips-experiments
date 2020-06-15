@@ -16,7 +16,12 @@ class SlipsHub():
     def run_detections(self, round, attacks: dict):
         self.sampler.process_attacks(round, attacks)
 
-        for peer in attacks.keys():
+        victims = []
+        for attack_list in attacks.values():
+            victims.extend(attack_list.keys())
+
+        victims = list(set(victims))
+        for peer in victims:
             interactions = self.sampler.get_last_interactions_of_peer(peer)
 
     def process_interactions(self, peer_name: str, interactions: dict):
