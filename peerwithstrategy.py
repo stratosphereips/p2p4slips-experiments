@@ -20,7 +20,7 @@ from strategies.basic_strategy import Strategy
 class PeerWithStrategy(Trust):
 
     def __init__(self, output_queue, peer_identifier: str, strategy: Strategy, config: ConfigParser,
-                 trust_params: dict):
+                 trust_params: dict, ipaddress: str):
         self.parent = super()
         self.parent.__init__(output_queue,
                          config,
@@ -35,6 +35,7 @@ class PeerWithStrategy(Trust):
 
         self.name = peer_identifier
         self.strategy = strategy
+        self.ipaddress = ipaddress
 
     def on_round_start(self, round: int):
         self.strategy.on_round_start(round)

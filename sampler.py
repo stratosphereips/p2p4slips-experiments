@@ -59,49 +59,49 @@ class Sampler:
         :return:
         """
 
-        for remote_peer_name, outgoing_attacks in attack_matrix.items():
+        for remote_peer_ip_address, outgoing_attacks in attack_matrix.items():
             # this is a line that tells me how everyone will treat peer with id peer_no
             for peer_name, action in outgoing_attacks.items():
-                if remote_peer_name == peer_name:
+                if remote_peer_ip_address == peer_name:
                     continue
 
                 new_score_dif = get_score_sample(action)
                 new_score_dif = get_diff_from_sample(new_score_dif)
-                self.update_scores(round, peer_name, remote_peer_name, new_score_dif)
+                self.update_scores(round, peer_name, remote_peer_ip_address, new_score_dif)
 
-    def update_scores(self, round, peer_name, remote_peer_name, score_dif):
-        last_score, last_confidence = self.get_last_score_confidence(peer_name, remote_peer_name)
+    def update_scores(self, round, peer_name, remote_peer_ip_address, score_dif):
+        last_score, last_confidence = self.get_last_score_confidence(peer_name, remote_peer_ip_address)
 
         new_score = min(1, max(last_score + score_dif, 0))
         real_score_dif = abs(last_score - new_score)
         confidence_dif = get_confidence_dif_from_score_dif(real_score_dif, new_score)
         new_confidence = min(1, max(last_confidence + confidence_dif, 0))
-        if peer_name == 1 and remote_peer_name == 0:
+        if peer_name == 1 and remote_peer_ip_address == 0:
             print(last_score, last_confidence, score_dif, real_score_dif, confidence_dif)
         new_score, new_confidence = clean_floats(new_score, new_confidence)
-        self.set_score_confidence(round, peer_name, remote_peer_name, new_score, new_confidence)
+        self.set_score_confidence(round, peer_name, remote_peer_ip_address, new_score, new_confidence)
 
-    def set_score_confidence(self, round, peer_name, attacker_name, score, confidence):
+    def set_score_confidence(self, round, peer_name, remote_peer_ip_address, score, confidence):
         if peer_name not in self.peer_data:
             self.peer_data[peer_name] = {}
 
-        if attacker_name not in self.peer_data[peer_name]:
-            self.peer_data[peer_name][attacker_name] = {"rounds": [], "data": []}
+        if remote_peer_ip_address not in self.peer_data[peer_name]:
+            self.peer_data[peer_name][remote_peer_ip_address] = {"rounds": [], "data": []}
 
-        self.peer_data[peer_name][attacker_name]["rounds"].append(round)
-        self.peer_data[peer_name][attacker_name]["data"].append((score, confidence))
+        self.peer_data[peer_name][remote_peer_ip_address]["rounds"].append(round)
+        self.peer_data[peer_name][remote_peer_ip_address]["data"].append((score, confidence))
 
-    def get_score_confidence_history(self, peer_name, attacker_name):
+    def get_score_confidence_history(self, peer_name, remote_peer_ip_address):
         try:
-            history = self.peer_data[peer_name][attacker_name]
+            history = self.peer_data[peer_name][remote_peer_ip_address]
             rounds = history["rounds"]
             data = history["data"]
             return rounds, data
         except:
             return [-1], [(0.5, 0.5)]
 
-    def get_last_score_confidence(self, peer_name, attacker_name):
-        rounds, data = self.get_score_confidence_history(peer_name, attacker_name)
+    def get_last_score_confidence(self, peer_name, remote_peer_ip_address):
+        rounds, data = self.get_score_confidence_history(peer_name, remote_peer_ip_address)
         return data[-1]
 
     def get_last_interactions_of_peer(self, peer_name):
@@ -122,8 +122,8 @@ class Sampler:
         plt.ylabel('Suggested change in confidence')
         plt.show()
 
-    def show_score_graphs(self, victim_name, attacker_name):
-        timeline, data = self.get_score_confidence_history(victim_name, attacker_name)
+    def show_score_graphs(self, victim_name, remote_peer_ip_address):
+        timeline, data = self.get_score_confidence_history(victim_name, remote_peer_ip_address)
 
         score = [h[0] for h in data]
         confidence = [h[1] for h in data]
