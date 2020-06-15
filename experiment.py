@@ -1,4 +1,5 @@
 # the experiment class, that initializes all other things and calls iterations
+import time
 from configparser import ConfigParser
 from multiprocessing import Queue
 
@@ -65,6 +66,7 @@ if __name__ == '__main__':
         for peer in peers:
             attacks[peer.ipaddress] = peer.make_choice(round, peer_names)
         hub.run_detections(round, attacks)
+        time.sleep(10)
 
     # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
     # s.show_score_graphs("good_guy_1", "all_attacker")

@@ -32,6 +32,7 @@ class PeerWithStrategy(Trust):
                          pygo_channel="p2p_pygo",
                          pigeon_logfile="",
                          start_pigeon=False)
+        self.parent.start()
 
         self.name = peer_identifier
         self.strategy = strategy
@@ -48,6 +49,7 @@ class PeerWithStrategy(Trust):
         self.strategy.on_round_end(round)
 
     def handle_update(self, ip_address: str) -> None:
+        # TODO: the peer doesn't check his db, because this overrides him! This is good.
         print("handle_update was called")
         pass
 

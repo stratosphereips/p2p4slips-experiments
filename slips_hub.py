@@ -5,6 +5,8 @@ from sampler import Sampler
 import sys
 import os
 # we need to go all the way up, because modules import slips-wide stuff
+from utils import update_slips_scores
+
 sys.path.append(os.getcwd() + '/../../..')
 from modules.p2ptrust.utils import get_ip_info_from_slips
 
@@ -23,15 +25,20 @@ class SlipsHub():
         victims = list(set(victims))
         for peer in victims:
             interactions = self.sampler.get_last_interactions_of_peer(peer)
+            self.process_interactions(peer, interactions)
 
     def process_interactions(self, peer_name: str, interactions: dict):
-        for attacker_ip_address, interaction in interactions.items():
-            score, confidence = interaction["data"][-1]
-            saved_score, saved_confidence = self.get_score_confidence(peer_name, attacker_ip_address)
-            # todo compare and send the new update
-        pass
-
-    def get_score_confidence(self, peer_name, attacker_ip_address):
         port = self.ipdb.get_peer_object(peer_name).port
+
+        for attacker_ip_address, interaction in interactions.items():
+            score, confidence = interaction
+            saved_score, saved_confidence = self.get_score_confidence(port, attacker_ip_address)
+            if score == saved_score and confidence == saved_confidence:
+                continue
+            else:
+                update_slips_scores("IPsInfo" + str(port), "ip_info_change" + str(port), attacker_ip_address, score, confidence)
+
+
+    def get_score_confidence(self, port, attacker_ip_address):
         storage_name = "IPsInfo" + str(port)
         return get_ip_info_from_slips(attacker_ip_address, storage_name)
