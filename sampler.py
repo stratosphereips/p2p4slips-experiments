@@ -104,6 +104,14 @@ class Sampler:
         rounds, data = self.get_score_confidence_history(peer_name, attacker_name)
         return data[-1]
 
+    def get_last_interactions_of_peer(self, peer_name):
+        interactions = self.peer_data[peer_name]
+        last_interactions = {}
+        for attacker in interactions.keys():
+            last_interaction = interactions[attacker]["data"][-1]
+            last_interactions[attacker] = last_interaction
+        return last_interactions
+
     def show_confidence_change_characteristics(self):
         X = list(range(-50, 50))
         X = [x/100 for x in X]
