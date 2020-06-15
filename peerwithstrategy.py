@@ -36,6 +36,7 @@ class PeerWithStrategy(Trust):
         self.name = peer_identifier
         self.strategy = strategy
         self.ipaddress = ipaddress
+        self.port = trust_params["pigeon_port"]
 
     def on_round_start(self, round: int):
         self.strategy.on_round_start(round)

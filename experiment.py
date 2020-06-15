@@ -53,6 +53,7 @@ if __name__ == '__main__':
     dovecot.start()
     ipdb = IPDatabase()
     for p in peers:
+        ipdb.set_peer_object(p.name, p)
         ipdb.set_custom_ip(p.name, p.ipaddress)
 
     s = Sampler(4)
