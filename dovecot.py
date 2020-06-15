@@ -13,9 +13,10 @@ import os
 sys.path.append(os.getcwd() + '/../../..')
 from slips.core.database import __database__
 
+
 class Dovecot(multiprocessing.Process):
 
-    def __init__(self, peer_ports):
+    def __init__(self, peer_ports: dict):
         super().__init__()
 
         self.peer_ports = peer_ports
@@ -33,6 +34,15 @@ class Dovecot(multiprocessing.Process):
             self.pubsub.subscribe("p2p_pygo" + str(peer_port))
 
         outgoing_channel_types = ["p2p_gopy", "p2p_data_request", "ip_info_change"]
+
+    def deactivate_peer(self, peer_name):
+        port = self.peer_ports[peer_name]
+        self.peer_names[port] = None
+        self.peer_ports[peer_name] = None
+
+    def activate_peer(self, peer_name, peer_port):
+        self.peer_names[peer_port] = peer_name
+        self.peer_ports[peer_name] = peer_port
 
     def run(self):
         try:
@@ -52,15 +62,14 @@ class Dovecot(multiprocessing.Process):
         except:
             pass
 
-    def send_string_to_channel(self, peer_name, channel_type, send_string):
+    def send_string_to_channel(self, peer_name, send_string):
+        if peer_name == "*":
+            for single_peer_name in self.peer_names.values():
+                self.send_string_to_channel(single_peer_name, send_string)
+            return
         peer_port = self.peer_ports[peer_name]
-        channel_name = channel_type + str(peer_port)
+        channel_name = "p2p_gopy" + str(peer_port)
         __database__.publish(channel_name, send_string)
-
-    def send_slips_update_to_peer(self, peername, score, confidence):
-        # save data to db
-        # send message to the peers update channel
-        pass
 
     def forward_message_to_peer(self, source_peer_name, message_data):
         # {"message": "ewogICAgIm........jYKfQ==","recipient": "peer_name_goes_here"}
@@ -78,6 +87,8 @@ class Dovecot(multiprocessing.Process):
         self.send_string_to_channel(message_data["recipient"], "p2p_gopy", str(data_content))
         pass
 
-    def send_reliability_to_peer(self):
-        # go sends reliability updates, this is simplified here and reliability is always 100%
-        pass
+    def send_reliability_to_peer(self, local_peer_name, remote_peer_name, peer_ip, reliability, timestamp):
+        update_data = {"peerid": remote_peer_name, "ip": peer_ip, "reliability": reliability, "timestamp": timestamp}
+        message = "peer_update " + str(update_data)
+
+        self.send_string_to_channel(local_peer_name, message)
