@@ -1,5 +1,6 @@
 from sampler import Attack
 from strategies.basic_strategy import Strategy
+from utils import NetworkUpdate
 
 
 class StrategyBeNice(Strategy):
@@ -8,7 +9,8 @@ class StrategyBeNice(Strategy):
         super().__init__()
 
     def on_round_start(self, round_no: int):
-        pass
+        if round_no == 0:
+            return NetworkUpdate.JoinWithSameIp, None
 
     def choose_round_behavior(self, round_no: int, peer_ids: list):
         attack_plan = dict.fromkeys(peer_ids, Attack.Benign)

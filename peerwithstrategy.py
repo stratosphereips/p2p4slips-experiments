@@ -44,7 +44,7 @@ class PeerWithStrategy(Trust):
         self.parent.start()
 
     def on_round_start(self, round: int):
-        self.strategy.on_round_start(round)
+        return self.strategy.on_round_start(round)
 
     def make_choice(self, round, peer_names):
         return self.strategy.choose_round_behavior(round, peer_names)

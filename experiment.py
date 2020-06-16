@@ -52,7 +52,6 @@ if __name__ == '__main__':
     p3 = PeerWithStrategy(output_process_queue, "all_attacker", p3_strategy, config, {"pigeon_port": 6663}, "1.1.1.3")
 
     peers = [p0, p1, p2, p3]
-    peer_names = [p0.name, p1.name, p2.name, p3.name]
 
     ctrl = Controller(peers, 10)
     ctrl.run_experiment()

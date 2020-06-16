@@ -8,10 +8,12 @@ import json
 sys.path.append(os.getcwd() + '/../../..')
 from slips.core.database import __database__
 
-class NetworkStatus(enum.Enum):
-    JoinWithNewIp = 0
-    JoinWithSameIp = 1
-    Leave = 2
+class NetworkUpdate(enum.Enum):
+    Stay = 0
+    JoinWithNewIp = 1
+    JoinWithSameIp = 2
+    ChangeIp = 3
+    Leave = 4
 
 
 def update_slips_scores(storage_name, channel_name, ip, score, confidence):

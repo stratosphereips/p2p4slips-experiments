@@ -10,9 +10,10 @@ from utils import update_slips_scores
 sys.path.append(os.getcwd() + '/../../..')
 from modules.p2ptrust.utils import get_ip_info_from_slips
 
+
 class SlipsHub():
-    def __init__(self, sampler: Sampler, ipdb: IPDatabase):
-        self.sampler = sampler
+    def __init__(self, ipdb: IPDatabase):
+        self.sampler = Sampler()
         self.ipdb = ipdb
 
     def run_detections(self, round, attacks: dict):
@@ -37,7 +38,6 @@ class SlipsHub():
                 continue
             else:
                 update_slips_scores("IPsInfo" + str(port), "ip_info_change" + str(port), attacker_ip_address, score, confidence)
-
 
     def get_score_confidence(self, port, attacker_ip_address):
         storage_name = "IPsInfo" + str(port)

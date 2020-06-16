@@ -1,5 +1,6 @@
 from sampler import Attack
 from strategies.basic_strategy import Strategy
+from utils import NetworkUpdate
 
 
 class StrategyAttackTarget(Strategy):
@@ -11,7 +12,8 @@ class StrategyAttackTarget(Strategy):
         self.override_handle_data_request = True
 
     def on_round_start(self, round_no: int):
-        pass
+        if round_no == 0:
+            return NetworkUpdate.JoinWithSameIp, None
 
     def choose_round_behavior(self, round_no: int, peer_ids: list):
         attack_plan = dict.fromkeys(peer_ids, Attack.Benign)
