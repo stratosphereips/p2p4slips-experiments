@@ -90,11 +90,11 @@ class Dovecot(multiprocessing.Process):
         self.send_string_to_peer_name(source_peer_name, message_data["recipient"], message_str)
         pass
 
-    def send_reliability_to_peer(self, local_peer_name, remote_peer_name, reliability, timestamp):
-        update_data = {"peerid": remote_peer_name, "reliability": reliability, "timestamp": timestamp}
+    def peer_data_update(self, peer: PeerWithStrategy):
+        update_data = {"peerid": peer.name, "reliability": 1, "timestamp": time.time(), "ip": peer.ipaddress}
         message = "peer_update " + json.dumps(update_data)
 
-        self.send_string_to_peer_name("*", local_peer_name, message)
+        self.send_string_to_peer_name(peer.name, "*", message)
 
     def get_sender_from_channel(self, channel):
         # read port from channel name and return the peer that owns this port
