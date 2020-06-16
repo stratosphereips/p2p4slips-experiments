@@ -55,6 +55,7 @@ if __name__ == '__main__':
     peer_names = [p0.name, p1.name, p2.name, p3.name]
 
     ctrl = Controller(peers, 10)
+    ctrl.run_experiment()
 
     # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
     # s.show_score_graphs("good_guy_1", "all_attacker")

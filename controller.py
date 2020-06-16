@@ -17,17 +17,18 @@ class Controller:
         dovecot = Dovecot(self.ipdb)
         dovecot.start()
         for p in self.peers:
-            ipdb.set_peer_object(p.name, p)
-            ipdb.set_custom_ip(p.name, p.ipaddress)
+            print(p.name)
+            self.ipdb.set_peer_object(p.name, p)
+            self.ipdb.set_custom_ip(p.name, p.ipaddress)
 
         sampler = Sampler()
-        hub = SlipsHub(sampler, ipdb)
+        hub = SlipsHub(sampler, self.ipdb)
         time.sleep(1)
 
         for round in range(0, 100):
             attacks = {}
             for peer in self.peers:
-                attacks[peer.ipaddress] = peer.make_choice(round, ipdb.names.keys())
+                attacks[peer.ipaddress] = peer.make_choice(round, self.ipdb.names.keys())
             hub.run_detections(round, attacks)
             time.sleep(1000)
 
