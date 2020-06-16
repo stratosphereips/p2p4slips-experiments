@@ -4,7 +4,7 @@ from sampler import Attack
 class Strategy:
     def __init__(self):
         self.override_handle_update = False
-        self.override_handle_p2p_data_request = False
+        self.override_handle_data_request = False
 
     def on_round_start(self, round_no: int):
         raise NotImplementedError
@@ -13,4 +13,10 @@ class Strategy:
         raise NotImplementedError
 
     def on_round_end(self, round_no: int):
+        raise NotImplementedError
+
+    def handle_update(self, ip_address: str):
+        raise NotImplementedError
+
+    def handle_data_request(self, message_data: str):
         raise NotImplementedError

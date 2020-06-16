@@ -7,6 +7,8 @@ class StrategyAttackTarget(Strategy):
     def __init__(self, target_name):
         super().__init__()
         self.target_name = target_name
+        self.override_handle_update = True
+        self.override_handle_data_request = True
 
     def on_round_start(self, round_no: int):
         pass
@@ -19,3 +21,9 @@ class StrategyAttackTarget(Strategy):
 
     def on_round_end(self, round_no: int):
         pass
+
+    def handle_update(self, ip_address: str):
+        print("I am an attacker, I don't check score updates")
+
+    def handle_data_request(self, message_data: str):
+        print("I am an attacker, I don't respond to queries")

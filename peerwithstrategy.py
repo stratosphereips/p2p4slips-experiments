@@ -21,6 +21,7 @@ class PeerWithStrategy(Trust):
 
     def __init__(self, output_queue, peer_identifier: str, strategy: Strategy, config: ConfigParser,
                  trust_params: dict, ipaddress: str):
+        self.strategy = strategy
         self.parent = super()
         self.parent.__init__(output_queue,
                          config,
@@ -35,7 +36,6 @@ class PeerWithStrategy(Trust):
         self.parent.start()
 
         self.name = peer_identifier
-        self.strategy = strategy
         self.ipaddress = ipaddress
         self.port = trust_params["pigeon_port"]
 
@@ -49,10 +49,16 @@ class PeerWithStrategy(Trust):
         self.strategy.on_round_end(round)
 
     def handle_update(self, ip_address: str) -> None:
-        # TODO: the peer doesn't check his db, because this overrides him! This is good.
-        print("handle_update was called")
+        if self.strategy.override_handle_update:
+            print("overriding handle_update")
+            self.strategy.handle_update(ip_address)
+        else:
+            self.parent.handle_update(ip_address)
         pass
 
     def handle_data_request(self, message_data: str) -> None:
-        print("handle_update was called")
-        pass
+        if self.strategy.override_handle_data_request:
+            print("overriding handle_data_request")
+            self.strategy.handle_data_request(message_data)
+        else:
+            self.parent.handle_data_request(message_data)
