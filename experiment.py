@@ -3,6 +3,7 @@ import time
 from configparser import ConfigParser
 from multiprocessing import Queue
 
+from controller import Controller
 from dovecot import Dovecot
 from experimental_printer import Printer
 from ipdb import IPDatabase
@@ -53,23 +54,7 @@ if __name__ == '__main__':
     peers = [p0, p1, p2, p3]
     peer_names = [p0.name, p1.name, p2.name, p3.name]
 
-    dovecot = Dovecot(peers)
-    dovecot.start()
-    ipdb = IPDatabase()
-    for p in peers:
-        ipdb.set_peer_object(p.name, p)
-        ipdb.set_custom_ip(p.name, p.ipaddress)
-
-    sampler = Sampler()
-    hub = SlipsHub(sampler, ipdb)
-    time.sleep(1)
-
-    for round in range(0, 100):
-        attacks = {}
-        for peer in peers:
-            attacks[peer.ipaddress] = peer.make_choice(round, peer_names)
-        hub.run_detections(round, attacks)
-        time.sleep(1000)
+    ctrl = Controller(peers, 10)
 
     # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
     # s.show_score_graphs("good_guy_1", "all_attacker")

@@ -25,6 +25,7 @@ class PeerWithStrategy(Trust):
         self.name = peer_identifier
         self.ipaddress = ipaddress
         self.port = trust_params["pigeon_port"]
+        self.active = False
 
         self.parent = super()
         self.parent.__init__(output_queue,
