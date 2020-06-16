@@ -32,7 +32,8 @@ class PeerWithStrategy(Trust):
                          gopy_channel="p2p_gopy",
                          pygo_channel="p2p_pygo",
                          pigeon_logfile="",
-                         start_pigeon=False)
+                         start_pigeon=False,
+                         rename_database=True)
         self.parent.start()
 
         self.name = peer_identifier

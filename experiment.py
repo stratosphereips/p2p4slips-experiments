@@ -53,7 +53,7 @@ if __name__ == '__main__':
     peers = [p0, p1, p2, p3]
     peer_names = [p0.name, p1.name, p2.name, p3.name]
 
-    dovecot = Dovecot({p0.name: 6660, p1.name: 6661, p2.name: 6662, p3.name:6663})
+    dovecot = Dovecot(peers)
     dovecot.start()
     ipdb = IPDatabase()
     for p in peers:

@@ -10,18 +10,19 @@ import multiprocessing
 import sys
 import os
 # we need to go all the way up, because modules import slips-wide stuff
+from peerwithstrategy import PeerWithStrategy
+
 sys.path.append(os.getcwd() + '/../../..')
 from slips.core.database import __database__
 
 
 class Dovecot(multiprocessing.Process):
 
-    def __init__(self, peer_ports: dict):
+    def __init__(self, peers: list):
         super().__init__()
 
-        self.peer_ports = peer_ports
-        #self.peer_ports = {"p1": 6666}
-        self.peer_names = {}
+        self.peers = peers
+        self.peers_by_name = {}
 
         # "p2p_gopy" this is where pigeon sends messages to the module core (GoListener is taking care of that)
         # "p2p_data_request" is a channel when Slips asks for network opinion - this will be used to get results out of the network
@@ -29,20 +30,20 @@ class Dovecot(multiprocessing.Process):
         # "p2p_pygo" this is where the core sends messages to the pigeon, these are always forwarded to other nodes (this is what we subscribe to)
 
         self.pubsub = __database__.r.pubsub()
-        for peer_name, peer_port in self.peer_ports.items():
-            self.peer_names[peer_port] = peer_name
-            self.pubsub.subscribe("p2p_pygo" + str(peer_port))
+        for peer in self.peers:
+            self.pubsub.subscribe(peer.pygo_channel)
+            self.peers_by_name[peer.name] = peer
 
         outgoing_channel_types = ["p2p_gopy", "p2p_data_request", "ip_info_change"]
 
     def deactivate_peer(self, peer_name):
-        port = self.peer_ports[peer_name]
-        self.peer_names[port] = None
-        self.peer_ports[peer_name] = None
+        peer = self.peers_by_name[peer_name]
+        self.peers.remove(peer)
+        self.peers_by_name[peer_name] = None
 
-    def activate_peer(self, peer_name, peer_port):
-        self.peer_names[peer_port] = peer_name
-        self.peer_ports[peer_name] = peer_port
+    def activate_peer(self, peer, peer_name):
+        self.peers_by_name[peer_name] = peer
+        self.peers.append(peer)
 
     def run(self):
         try:
@@ -62,13 +63,17 @@ class Dovecot(multiprocessing.Process):
         except:
             pass
 
-    def send_string_to_channel(self, peer_name, send_string):
+    def send_string_to_peer_name(self, peer_name, send_string):
         if peer_name == "*":
-            for single_peer_name in self.peer_names.values():
-                self.send_string_to_channel(single_peer_name, send_string)
+            for single_peer_name in self.peers_by_name.keys():
+                self.send_string_to_peer_name(single_peer_name, send_string)
             return
-        peer_port = self.peer_ports[peer_name]
-        channel_name = "p2p_gopy" + str(peer_port)
+        else:
+            peer = self.peers_by_name[peer_name]
+            self.send_string_to_peer(peer, send_string)
+
+    def send_string_to_peer(self, peer: PeerWithStrategy, send_string: str):
+        channel_name = peer.gopy_channel()
         __database__.publish(channel_name, send_string)
 
     def forward_message_to_peer(self, source_peer_name, message_data):
@@ -84,11 +89,11 @@ class Dovecot(multiprocessing.Process):
         # ]
 
         data_content = [{"reporter": source_peer_name, "report_time": time.time(), "message": message_data["message"]}]
-        self.send_string_to_channel(message_data["recipient"], "p2p_gopy", str(data_content))
+        self.send_string_to_peer_name(message_data["recipient"], str(data_content))
         pass
 
     def send_reliability_to_peer(self, local_peer_name, remote_peer_name, peer_ip, reliability, timestamp):
         update_data = {"peerid": remote_peer_name, "ip": peer_ip, "reliability": reliability, "timestamp": timestamp}
         message = "peer_update " + str(update_data)
 
-        self.send_string_to_channel(local_peer_name, message)
+        self.send_string_to_peer_name(local_peer_name, message)
