@@ -9,7 +9,9 @@ from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
 from sampler import Sampler, Attack
 from slips_hub import SlipsHub
-from strategies.basic_strategy import StrategyAttackAll, StrategyAttackTarget, StrategyBeNice
+from strategies.strategy_benign import StrategyBeNice
+from strategies.strategy_attack_all import StrategyAttackAll
+from strategies.strategy_attack_target import StrategyAttackTarget
 
 # make imports from parent directory possible
 import sys
