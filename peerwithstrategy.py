@@ -22,23 +22,25 @@ class PeerWithStrategy(Trust):
     def __init__(self, output_queue, peer_identifier: str, strategy: Strategy, config: ConfigParser,
                  trust_params: dict, ipaddress: str):
         self.strategy = strategy
-        self.parent = super()
-        self.parent.__init__(output_queue,
-                         config,
-                         pigeon_port=trust_params["pigeon_port"],
-                         rename_with_port=True,
-                         slips_update_channel="ip_info_change",
-                         p2p_data_request_channel="p2p_data_request",
-                         gopy_channel="p2p_gopy",
-                         pygo_channel="p2p_pygo",
-                         pigeon_logfile="",
-                         start_pigeon=False,
-                         rename_database=True)
-        self.parent.start()
-
         self.name = peer_identifier
         self.ipaddress = ipaddress
         self.port = trust_params["pigeon_port"]
+
+        self.parent = super()
+        self.parent.__init__(output_queue,
+                             config,
+                             pigeon_port=trust_params["pigeon_port"],
+                             rename_with_port=True,
+                             slips_update_channel="ip_info_change",
+                             p2p_data_request_channel="p2p_data_request",
+                             gopy_channel="p2p_gopy",
+                             pygo_channel="p2p_pygo",
+                             pigeon_logfile="",
+                             start_pigeon=False,
+                             rename_redis_ip_info=True,
+                             rename_sql_db_file=True,
+                             name_suffix=str(trust_params["pigeon_port"]))
+        self.parent.start()
 
     def on_round_start(self, round: int):
         self.strategy.on_round_start(round)
@@ -53,9 +55,10 @@ class PeerWithStrategy(Trust):
         if self.strategy.override_handle_update:
             print("overriding handle_update")
             self.strategy.handle_update(ip_address)
-        else:
+            return
+        k = 4
+        if ip_address != self.ipaddress:
             self.parent.handle_update(ip_address)
-        pass
 
     def handle_data_request(self, message_data: str) -> None:
         if self.strategy.override_handle_data_request:

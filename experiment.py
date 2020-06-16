@@ -62,13 +62,14 @@ if __name__ == '__main__':
 
     sampler = Sampler()
     hub = SlipsHub(sampler, ipdb)
+    time.sleep(1)
 
     for round in range(0, 100):
         attacks = {}
         for peer in peers:
             attacks[peer.ipaddress] = peer.make_choice(round, peer_names)
         hub.run_detections(round, attacks)
-        time.sleep(10)
+        time.sleep(1000)
 
     # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
     # s.show_score_graphs("good_guy_1", "all_attacker")
