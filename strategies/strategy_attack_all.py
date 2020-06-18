@@ -13,6 +13,7 @@ class StrategyAttackAll(Strategy):
     def on_round_start(self, round_no: int):
         if round_no == 0:
             return NetworkUpdate.JoinWithSameIp, None
+        return None, None
 
     def choose_round_behavior(self, round_no: int, peer_ids: list):
         attack_plan = dict.fromkeys(peer_ids, Attack.GeneralAttack)

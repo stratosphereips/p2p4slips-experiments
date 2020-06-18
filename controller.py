@@ -37,7 +37,7 @@ class Controller:
             for peer in self.peers:
                 attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.names.keys())
             self.hub.run_detections(rnd, attacks)
-            time.sleep(1000)
+            time.sleep(1)
 
         for rnd in range(0, self.rounds):
 
