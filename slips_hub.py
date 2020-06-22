@@ -31,6 +31,7 @@ class SlipsHub():
         for peer in victims:
             interactions = self.sampler.get_last_interactions_of_peer(peer)
             self.process_interactions(peer, interactions)
+            time.sleep(1)
 
     def process_interactions(self, peer_name: str, interactions: dict):
         port = self.ipdb.names[peer_name].port

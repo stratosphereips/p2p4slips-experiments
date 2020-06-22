@@ -86,8 +86,9 @@ class Dovecot(multiprocessing.Process):
         # }
         # ]
 
-        data_content = [{"reporter": source_peer_name, "report_time": time.time(), "message": message_data["message"]}]
-        message_str = "go_data " + json.dumps(data_content)
+        data_content = {"reporter": source_peer_name, "report_time": time.time(), "message": message_data["message"]}
+        data_message = {"message_type": "go_data", "message_contents": data_content}
+        message_str = (data_message)
         self.send_string_to_peer_name(source_peer_name, message_data["recipient"], message_str)
         pass
 
@@ -111,7 +112,8 @@ class Dovecot(multiprocessing.Process):
     def notify_at_round_start(self):
         for peer in self.recently_updated_peers:
             update_data = {"peerid": peer.name, "reliability": 1, "timestamp": time.time(), "ip": peer.ipaddress}
-            message = "peer_update " + json.dumps(update_data)
+            update_message = {"message_type": "peer_update", "message_contents": update_data}
+            message = json.dumps(update_message)
 
             self.send_string_to_peer_name(peer.name, "*", message)
 
