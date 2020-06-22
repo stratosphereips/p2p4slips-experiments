@@ -26,7 +26,7 @@ class Controller:
         # wait so channels don't start sending data too early
         time.sleep(1)
 
-        for rnd in range(0, 100):
+        for rnd in range(0, self.rounds):
 
             # on round start
             for peer in self.peers:
@@ -37,11 +37,8 @@ class Controller:
             for peer in self.peers:
                 attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.names.keys())
             self.hub.run_detections(rnd, attacks)
-            time.sleep(1)
-
-        for rnd in range(0, self.rounds):
-
-            pass
+            time.sleep(0.2)
+            self.hub.collect_data()
 
     def process_round_start(self, peer: PeerWithStrategy, action: NetworkUpdate, params: str):
         if action == NetworkUpdate.Stay:
