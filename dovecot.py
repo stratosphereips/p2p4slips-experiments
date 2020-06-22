@@ -69,8 +69,11 @@ class Dovecot(multiprocessing.Process):
         self.send_string_to_peer(peer, send_string)
 
     def send_string_to_peer(self, peer: PeerWithStrategy, send_string: str):
-        if not peer.active:
-            return
+        # TODO there is something very wrong here. The peers are never active, even though I set them to be active.
+        #  The object memory locations didn't change, which leads me to think there is a thread synchronization
+        #  thing going on which makes my peers not updated, and therefore inactive
+        # if not peer.active:
+        #     return
         channel_name = peer.gopy_channel
         __database__.publish(channel_name, send_string)
 
