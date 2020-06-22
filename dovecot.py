@@ -33,6 +33,7 @@ class Dovecot(multiprocessing.Process):
         self.pubsub = __database__.r.pubsub()
         for peer in self.ipdb.peers:
             self.pubsub.subscribe(peer.pygo_channel)
+        self.recently_updated_peers = []
 
     def run(self):
         try:
@@ -91,10 +92,7 @@ class Dovecot(multiprocessing.Process):
         pass
 
     def peer_data_update(self, peer: PeerWithStrategy):
-        update_data = {"peerid": peer.name, "reliability": 1, "timestamp": time.time(), "ip": peer.ipaddress}
-        message = "peer_update " + json.dumps(update_data)
-
-        self.send_string_to_peer_name(peer.name, "*", message)
+        self.recently_updated_peers.append(peer)
 
     def get_sender_from_channel(self, channel):
         # read port from channel name and return the peer that owns this port
@@ -109,4 +107,14 @@ class Dovecot(multiprocessing.Process):
             except:
                 continue
         print("Couldn't find peer running on channel " + channel)
+
+    def notify_at_round_start(self):
+        for peer in self.recently_updated_peers:
+            update_data = {"peerid": peer.name, "reliability": 1, "timestamp": time.time(), "ip": peer.ipaddress}
+            message = "peer_update " + json.dumps(update_data)
+
+            self.send_string_to_peer_name(peer.name, "*", message)
+
+        self.recently_updated_peers = []
+
 
