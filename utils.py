@@ -23,6 +23,7 @@ def update_slips_scores(storage_name, channel_name, ip, score, confidence):
 
 
 def publish_str_to_channel(channel_name, message):
+    print("XXXXXXXXXXXXXXXXXXXXXXXXX Sending message to channel: " + channel_name)
     __database__.r.publish(channel_name, message)
 
 

@@ -13,6 +13,7 @@ import os
 # we need to go all the way up, because modules import slips-wide stuff
 from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
+from utils import publish_str_to_channel
 
 sys.path.append(os.getcwd() + '/../../..')
 from slips.core.database import __database__
@@ -75,7 +76,8 @@ class Dovecot(multiprocessing.Process):
         # if not peer.active:
         #     return
         channel_name = peer.gopy_channel
-        __database__.publish(channel_name, send_string)
+        print("XXXXXXXXXXXXXXXXXXXXXXXXX Requesting message to channel: " + channel_name)
+        publish_str_to_channel(channel_name, send_string)
 
     def forward_message_to_peer(self, source_peer_name, message_data: dict):
         # {"message": "ewogICAgIm........jYKfQ==","recipient": "peer_name_goes_here"}
