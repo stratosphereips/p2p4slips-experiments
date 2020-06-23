@@ -40,17 +40,18 @@ class Controller:
                 action, params = peer.on_round_start(rnd)
                 self.process_round_start(peer, action, params)
             self.dovecot.notify_at_round_start()
+            time.sleep(1)
 
             attacks = {}
             for peer in self.peers:
                 attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.names.keys())
             self.hub.run_detections(rnd, attacks)
-            time.sleep(0.2)
+            time.sleep(1)
             self.hub.collect_data()
             if rnd == 0:
-                time.sleep(10)
+                time.sleep(3)
             else:
-                time.sleep(10000)
+                time.sleep(3)
 
     def process_round_start(self, peer: PeerWithStrategy, action: NetworkUpdate, params: str):
         if action == NetworkUpdate.Stay:

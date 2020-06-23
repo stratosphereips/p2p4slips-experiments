@@ -58,7 +58,7 @@ class SlipsHub():
                 publish_str_to_channel(request_channel, ip + " 0")
         
         # wait
-        time.sleep(1)
+        time.sleep(3)
         
         # collect data from that peers database
         for peer_name in self.control_peer_names:
