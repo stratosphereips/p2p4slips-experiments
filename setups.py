@@ -20,5 +20,5 @@ def get_basic_experiment(output_process_queue, config):
 
     peers = [p0, p1, p2, p3]
 
-    ctrl = Controller(peers, 60)
+    ctrl = Controller(peers, 30)
     return ctrl

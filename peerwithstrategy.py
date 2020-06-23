@@ -42,6 +42,7 @@ class PeerWithStrategy(Trust):
                              rename_sql_db_file=True,
                              name_suffix=str(trust_params["pigeon_port"]))
         self.parent.start()
+        self.is_good = self.strategy.is_good
 
     def on_round_start(self, round: int):
         return self.strategy.on_round_start(round)

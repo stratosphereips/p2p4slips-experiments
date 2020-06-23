@@ -48,12 +48,10 @@ class Controller:
             self.hub.run_detections(rnd, attacks)
             time.sleep(1)
             self.hub.collect_data(rnd)
-            if rnd == 0:
-                time.sleep(3)
-            else:
-                time.sleep(3)
+            time.sleep(1)
 
-        evaluate(self.hub.observations, self.ipdb)
+        evaluate(self.hub.observations, self.ipdb, self.rounds)
+        time.sleep(10000)
 
     def process_round_start(self, peer: PeerWithStrategy, action: NetworkUpdate, params: str):
         if action == NetworkUpdate.Stay:

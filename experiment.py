@@ -5,6 +5,7 @@ from multiprocessing import Queue
 
 from controller import Controller
 from dovecot import Dovecot
+from evaluator import evaluate
 from experimental_printer import Printer
 from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
