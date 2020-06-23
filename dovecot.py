@@ -71,13 +71,7 @@ class Dovecot(multiprocessing.Process):
         self.send_string_to_port(port, send_string)
 
     def send_string_to_port(self, port: int, send_string: str):
-        # TODO there is something very wrong here. The peers are never active, even though I set them to be active.
-        #  The object memory locations didn't change, which leads me to think there is a thread synchronization
-        #  thing going on which makes my peers not updated, and therefore inactive
-        # if not peer.active:
-        #     return
         channel_name = self.gopy_channel + str(port)
-        print("XXXXXXXXXXXXXXXXXXXXXXXXX Requesting message to channel: " + channel_name)
         self.publish_str_to_channel(channel_name, send_string)
 
     def forward_message_to_peer(self, source_peer_name, message_data: dict):

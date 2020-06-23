@@ -4,7 +4,6 @@ import copy
 from dovecot import Dovecot
 from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
-from sampler import Sampler
 from slips_hub import SlipsHub
 from utils import NetworkUpdate
 
@@ -24,6 +23,7 @@ class Controller:
         new_port_names = copy.deepcopy(port_names)
 
         self.dovecot = Dovecot(new_port_names, "p2p_pygo", "p2p_gopy")
+        self.dovecot.start()
 
         # start slips simulator (doesn't actively listen to anything, but can be called in functions)
         self.hub = SlipsHub(self.ipdb)
