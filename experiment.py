@@ -54,6 +54,7 @@ if __name__ == '__main__':
     peers = [p0, p1, p2, p3]
 
     ctrl = Controller(peers, 60)
+    ctrl.dovecot.start()
     ctrl.run_experiment()
 
     ctrl.hub.sampler.show_score_graphs("good_guy_1", "1.1.1.3")

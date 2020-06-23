@@ -1,4 +1,5 @@
 import time
+import copy
 
 from dovecot import Dovecot
 from ipdb import IPDatabase
@@ -15,13 +16,19 @@ class Controller:
         self.timeouts = timeouts
         self.ipdb = IPDatabase(self.peers)
         # start pigeon simulator (runs in background and forwards messages, also has to process status changes)
-        self.dovecot = Dovecot(self.ipdb)
+
+        port_names = {}
+        for peer in self.ipdb.peers:
+            port_names[peer.port] = peer.name
+
+        new_port_names = copy.deepcopy(port_names)
+
+        self.dovecot = Dovecot(new_port_names, "p2p_pygo", "p2p_gopy")
 
         # start slips simulator (doesn't actively listen to anything, but can be called in functions)
         self.hub = SlipsHub(self.ipdb)
 
     def run_experiment(self):
-        self.dovecot.start()
 
         # wait so channels don't start sending data too early
         time.sleep(1)
