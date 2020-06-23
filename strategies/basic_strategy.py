@@ -7,6 +7,7 @@ class Strategy:
     def __init__(self):
         self.override_handle_update = False
         self.override_handle_data_request = False
+        self.is_good = True
 
     def on_round_start(self, round_no: int):
         raise NotImplementedError

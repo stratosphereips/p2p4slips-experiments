@@ -2,6 +2,7 @@ import time
 import copy
 
 from dovecot import Dovecot
+from evaluator import evaluate
 from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
 from slips_hub import SlipsHub
@@ -21,7 +22,6 @@ class Controller:
             port_names[peer.port] = peer.name
 
         new_port_names = copy.deepcopy(port_names)
-
         self.dovecot = Dovecot(new_port_names, "p2p_pygo", "p2p_gopy")
         self.dovecot.start()
 
@@ -47,11 +47,13 @@ class Controller:
                 attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.names.keys())
             self.hub.run_detections(rnd, attacks)
             time.sleep(1)
-            self.hub.collect_data()
+            self.hub.collect_data(rnd)
             if rnd == 0:
                 time.sleep(3)
             else:
                 time.sleep(3)
+
+        evaluate(self.hub.observations, self.ipdb)
 
     def process_round_start(self, peer: PeerWithStrategy, action: NetworkUpdate, params: str):
         if action == NetworkUpdate.Stay:

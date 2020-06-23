@@ -9,6 +9,7 @@ class StrategyAttackAll(Strategy):
         super().__init__()
         self.override_handle_update = True
         self.override_handle_data_request = True
+        self.is_good = False
 
     def on_round_start(self, round_no: int):
         if round_no == 0:
