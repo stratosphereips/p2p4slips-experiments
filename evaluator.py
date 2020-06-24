@@ -38,5 +38,9 @@ def evaluate(observations: dict, ipdb: IPDatabase, rounds):
                         fn += 1  # we are wrong
 
     print("STATS: ", tp, tn, fp, fn)
+    success = tp + tn
+    all = tp + tn + fp + fn
+    accuracy = success / all
+    print("ACCURACY: ", accuracy)
 
 
