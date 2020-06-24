@@ -27,21 +27,23 @@ class PeerWithStrategy(Trust):
         self.port = trust_params["pigeon_port"]
         self.active = False
 
-        self.parent = super()
-        self.parent.__init__(output_queue,
-                             config,
-                             pigeon_port=trust_params["pigeon_port"],
-                             rename_with_port=True,
-                             slips_update_channel="ip_info_change",
-                             p2p_data_request_channel="p2p_data_request",
-                             gopy_channel="p2p_gopy",
-                             pygo_channel="p2p_pygo",
-                             pigeon_logfile="",
-                             start_pigeon=False,
-                             rename_redis_ip_info=True,
-                             rename_sql_db_file=True,
-                             name_suffix=str(trust_params["pigeon_port"]))
-        self.parent.start()
+        if self.strategy.do_p2p:
+            self.parent = super()
+            self.parent.__init__(output_queue,
+                                 config,
+                                 pigeon_port=trust_params["pigeon_port"],
+                                 rename_with_port=True,
+                                 slips_update_channel="ip_info_change",
+                                 p2p_data_request_channel="p2p_data_request",
+                                 gopy_channel="p2p_gopy",
+                                 pygo_channel="p2p_pygo",
+                                 pigeon_logfile="",
+                                 start_pigeon=False,
+                                 rename_redis_ip_info=True,
+                                 rename_sql_db_file=True,
+                                 name_suffix=str(trust_params["pigeon_port"]))
+            self.parent.start()
+
         self.is_good = self.strategy.is_good
 
     def on_round_start(self, round: int):

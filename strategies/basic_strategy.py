@@ -8,6 +8,7 @@ class Strategy:
         self.override_handle_update = False
         self.override_handle_data_request = False
         self.is_good = True
+        self.do_p2p = True
 
     def on_round_start(self, round_no: int):
         raise NotImplementedError
