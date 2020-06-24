@@ -49,7 +49,7 @@ def clean_floats(new_score, new_confidence):
 class Sampler:
     def __init__(self):
         self.peer_data = {}
-        self.default_data = (0.5, 0.5)
+        self.default_data = (0, 0)
 
     def process_attacks(self, round, attack_matrix: dict):
         """
@@ -64,14 +64,48 @@ class Sampler:
                 if remote_peer_ip_address == peer_name:
                     continue
 
-                new_score_dif = get_score_sample(action)
-                new_score_dif = get_diff_from_sample(new_score_dif)
-                self.update_scores(round, peer_name, remote_peer_ip_address, new_score_dif)
+                self.basic_update_score(round, peer_name, remote_peer_ip_address, action)
+
+                # new_score_dif = get_score_sample(action)
+                # new_score_dif = get_diff_from_sample(new_score_dif)
+                # self.update_scores(round, peer_name, remote_peer_ip_address, new_score_dif)
+
+    def basic_update_score(self, round, peer_name, remote_peer_ip_address, action):
+        print("SAMPLER DEBUG", round, peer_name, remote_peer_ip_address, action)
+        last_score, last_confidence = self.get_last_score_confidence(peer_name, remote_peer_ip_address)
+
+        if action == Attack.TargetedAttack:
+            score = min(last_score - 0.8, -0.8)
+            confidence = max(last_confidence + 0.8, 0.8)
+        elif action == Attack.GeneralAttack:
+            score = min(last_score - 0.4, -0.4)
+            confidence = max(last_confidence + 0.6, 0.6)
+        elif action == Attack.TargetedOnOthers:
+            score = min(last_score - 0.2, -0.2)
+            confidence = max(last_confidence + 0.2, 0.4)
+        elif action == Attack.Benign:
+            score = last_score + 0.3
+            if last_score < 0:
+                confidence = 0
+            else:
+                confidence = last_confidence + 0.1
+        else:
+            print("THIS IS A DISASTER")
+
+        print(score, confidence)
+
+        new_score = min(1, max(score, -1))
+        new_confidence = min(1, max(confidence, 0))
+
+        print(new_score, new_confidence)
+
+        self.set_score_confidence(round, peer_name, remote_peer_ip_address, new_score, new_confidence)
+        pass
 
     def update_scores(self, round, peer_name, remote_peer_ip_address, score_dif):
         last_score, last_confidence = self.get_last_score_confidence(peer_name, remote_peer_ip_address)
 
-        new_score = min(1, max(last_score + score_dif, 0))
+        new_score = min(1, max(last_score + score_dif, -1))
         real_score_dif = abs(last_score - new_score)
         confidence_dif = get_confidence_dif_from_score_dif(real_score_dif, new_score)
         new_confidence = min(1, max(last_confidence + confidence_dif, 0))
@@ -97,7 +131,7 @@ class Sampler:
             data = history["data"]
             return rounds, data
         except:
-            return [-1], [(0.5, 0.5)]
+            return [-1], [(0, 0)]
 
     def get_last_score_confidence(self, peer_name, remote_peer_ip_address):
         rounds, data = self.get_score_confidence_history(peer_name, remote_peer_ip_address)
@@ -124,12 +158,14 @@ class Sampler:
     def show_score_graphs(self, victim_name, remote_peer_ip_address):
         timeline, data = self.get_score_confidence_history(victim_name, remote_peer_ip_address)
 
+        print("DDAAAATTTTAAA", data)
+
         score = [h[0] for h in data]
         confidence = [h[1] for h in data]
 
         plt.plot(timeline, score, color='g')
         plt.plot(timeline, confidence, color='orange')
-        plt.ylim(-0.05, 1.05)
+        plt.ylim(-1.05, 1.05)
         plt.xlabel('Algorithm rounds')
         plt.ylabel('Simulated IDS output')
         plt.title('Changes in score (green) and confidence (orange) in time')

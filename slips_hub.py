@@ -34,6 +34,18 @@ class SlipsHub():
             self.process_interactions(peer, interactions)
             time.sleep(1)
 
+    def run_detections_ids_only(self, round, attacks: dict):
+        self.sampler.process_attacks(round, attacks)
+
+        victims = []
+        for attack_list in attacks.values():
+            victims.extend(attack_list.keys())
+
+        victims = list(set(victims))
+        for peer in victims:
+            interactions = self.sampler.get_last_interactions_of_peer(peer)
+            self.process_interactions(peer, interactions)
+
     def process_interactions(self, peer_name: str, interactions: dict):
         port = self.ipdb.names[peer_name].port
         storage_name = "IPsInfo" + str(port)

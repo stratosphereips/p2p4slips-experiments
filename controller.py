@@ -6,7 +6,7 @@ from evaluator import evaluate
 from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
 from slips_hub import SlipsHub
-from utils import NetworkUpdate
+from utils import NetworkUpdate, publish_str_to_channel
 
 
 class Controller:
@@ -51,6 +51,24 @@ class Controller:
             time.sleep(1)
 
         evaluate(self.hub.observations, self.ipdb, self.rounds)
+        self.hub.sampler.show_score_graphs("good_guy_1", "1.1.1.2")
+        time.sleep(10000)
+
+    def run_experiment_ids_only(self):
+
+        # wait so channels don't start sending data too early
+        time.sleep(1)
+        for peer in self.peers:
+            publish_str_to_channel("ip_info_change_" + str(peer.port), "stop_process")
+        time.sleep(1)
+
+        for rnd in range(0, self.rounds):
+            attacks = {}
+            for peer in self.peers:
+                attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.names.keys())
+            self.hub.run_detections_ids_only(rnd, attacks)
+
+        self.hub.sampler.show_score_graphs("good_guy_0", "1.1.1.2")
         time.sleep(10000)
 
     def process_round_start(self, peer: PeerWithStrategy, action: NetworkUpdate, params: str):

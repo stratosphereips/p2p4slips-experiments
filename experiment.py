@@ -44,6 +44,6 @@ if __name__ == '__main__':
 
     ctrl.run_experiment()
 
-    ctrl.hub.sampler.show_score_graphs("good_guy_1", "1.1.1.3")
+    # ctrl.hub.sampler.show_score_graphs("good_guy_1", "1.1.1.3")
     # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
     # s.show_score_graphs("good_guy_1", "all_attacker")
