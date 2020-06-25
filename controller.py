@@ -10,11 +10,13 @@ from utils import NetworkUpdate, publish_str_to_channel
 
 
 class Controller:
-    def __init__(self, peers: list, rounds: int, timeouts: int = 5):
+    def __init__(self, peers: list, rounds: int, control_ips: list, observed_ips: list, timeouts: int = 5):
         self.peers = peers
         self.rounds = rounds
         self.timeouts = timeouts
         self.ipdb = IPDatabase(self.peers)
+        self.control_ips = control_ips
+        self.observed_ips = observed_ips
         # start pigeon simulator (runs in background and forwards messages, also has to process status changes)
 
         port_names = {}
@@ -26,7 +28,8 @@ class Controller:
         self.dovecot.start()
 
         # start slips simulator (doesn't actively listen to anything, but can be called in functions)
-        self.hub = SlipsHub(self.ipdb)
+        self.hub = SlipsHub(self.ipdb, self.control_ips, self.observed_ips)
+        self.attack_history = []
 
     def run_experiment(self):
 
@@ -49,10 +52,10 @@ class Controller:
             time.sleep(1)
             self.hub.collect_data(rnd)
             time.sleep(1)
+            self.attack_history.append(attacks)
 
         evaluate(self.hub.observations, self.ipdb, self.rounds)
-        self.hub.sampler.show_score_graphs("1.1.1.1", "1.1.1.2")
-        time.sleep(10000)
+        self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
 
     def run_experiment_ids_only(self):
 
@@ -68,8 +71,7 @@ class Controller:
                 attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.ips.keys())
             self.hub.run_detections_ids_only(rnd, attacks)
 
-        self.hub.sampler.show_score_graphs("1.1.1.1", "1.1.1.2")
-        time.sleep(10000)
+        self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
 
     def process_round_start(self, peer: PeerWithStrategy, action: NetworkUpdate, params: str):
         if action == NetworkUpdate.Stay:

@@ -14,11 +14,11 @@ from modules.p2ptrust.utils import get_ip_info_from_slips
 
 
 class SlipsHub():
-    def __init__(self, ipdb: IPDatabase):
+    def __init__(self, ipdb: IPDatabase, control_ips: list, observed_ips: list):
         self.sampler = Sampler()
         self.ipdb = ipdb
-        self.control_peer_ips = ["1.1.1.0"]
-        self.observed_ips = ["1.1.1.3"]
+        self.control_ips = control_ips
+        self.observed_ips = observed_ips
         self.observations = {}
 
     def run_detections(self, round, attacks: dict):
@@ -66,7 +66,7 @@ class SlipsHub():
 
         # for peer in list
         # send message to that peers request channel
-        for peer_ip in self.control_peer_ips:
+        for peer_ip in self.control_ips:
             peer = self.ipdb.ips[peer_ip]
             request_channel = "p2p_data_request" + str(peer.port)
             for ip in self.observed_ips:
@@ -76,7 +76,7 @@ class SlipsHub():
         time.sleep(3)
         
         # collect data from that peers database
-        for peer_ip in self.control_peer_ips:
+        for peer_ip in self.control_ips:
             round_results[peer_ip] = {}
             peer = self.ipdb.ips[peer_ip]
             storage_name = "IPsInfo" + str(peer.port)

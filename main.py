@@ -3,6 +3,8 @@ import time
 from configparser import ConfigParser
 from multiprocessing import Queue
 
+import json
+
 from controller import Controller
 from dovecot import Dovecot
 from evaluator import evaluate
@@ -29,6 +31,15 @@ def get_default_config():
     cfg.read_file(open("../../../slips.conf"))
     return cfg
 
+
+def save_exp_data(ctrl: Controller):
+    round_results = ctrl.hub.observations
+    attack_history = ctrl.attack_history
+    data = {"round_results": round_results, "attack_history": attack_history}
+
+    with open('data.txt', 'w') as outfile:
+        json.dump(data, outfile)
+
 if __name__ == '__main__':
     config = get_default_config()
     output_process_queue = Queue()
@@ -44,6 +55,4 @@ if __name__ == '__main__':
 
     ctrl.run_experiment()
 
-    # ctrl.hub.sampler.show_score_graphs("good_guy_1", "1.1.1.3")
-    # s.show_score_graphs("good_guy_0", "attacker_targeting_p0")
-    # s.show_score_graphs("good_guy_1", "all_attacker")
+    save_exp_data(ctrl)

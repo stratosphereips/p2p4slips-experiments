@@ -21,7 +21,7 @@ def get_basic_experiment(output_process_queue, config):
 
     peers = [p0, p1, p2, p3]
 
-    ctrl = Controller(peers, 5)
+    ctrl = Controller(peers, 5, ["1.1.1.0"], ["1.1.1.3"])
     return ctrl
 
 
@@ -50,5 +50,5 @@ def get_idtrust_experiment_1(output_process_queue, config):
         strategy.set_module_process(peer)
         peers.append(peer)
 
-    ctrl = Controller(peers, 5)
+    ctrl = Controller(peers, 2, ["1.1.1.0"], ["1.1.1.15"])
     return ctrl
