@@ -13,8 +13,8 @@ class StrategyBeNice(Strategy):
             return NetworkUpdate.JoinWithSameIp, None
         return None, None
 
-    def choose_round_behavior(self, round_no: int, peer_ids: list):
-        attack_plan = dict.fromkeys(peer_ids, Attack.Benign)
+    def choose_round_behavior(self, round_no: int, peer_ips: list):
+        attack_plan = dict.fromkeys(peer_ips, Attack.Benign)
         return attack_plan
 
     def on_round_end(self, round_no: int):

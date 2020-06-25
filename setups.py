@@ -13,7 +13,7 @@ def get_basic_experiment(output_process_queue, config):
     p1_strategy = StrategyBeNice()
     p1 = PeerWithStrategy(output_process_queue, "good_guy_1", p1_strategy, config, {"pigeon_port": 6661}, "1.1.1.1")
 
-    p2_strategy = StrategyAttackTarget("good_guy_0")
+    p2_strategy = StrategyAttackTarget("1.1.1.0")
     p2 = PeerWithStrategy(output_process_queue, "attacker_targeting_p0", p2_strategy, config, {"pigeon_port": 6662}, "1.1.1.2")
 
     p3_strategy = StrategyAttackAll()
@@ -34,7 +34,6 @@ def get_idtrust_experiment_1(output_process_queue, config):
         name = "good_guy_" + str(i)
         ip = "1.1.1." + str(i)
         port = 6660 + i
-        print(port)
         strategy = StrategyBeNice()
         peer = PeerWithStrategy(output_process_queue, name, strategy, config, {"pigeon_port": port}, ip)
         peers.append(peer)
