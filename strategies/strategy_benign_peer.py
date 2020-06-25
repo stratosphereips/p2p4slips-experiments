@@ -3,7 +3,7 @@ from strategies.basic_strategy import Strategy
 from utils import NetworkUpdate
 
 
-class StrategyBeNice(Strategy):
+class StrategyBenignPeer(Strategy):
 
     def __init__(self):
         super().__init__()

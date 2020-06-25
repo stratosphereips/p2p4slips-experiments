@@ -20,7 +20,7 @@ from strategies.basic_strategy import Strategy
 class PeerWithStrategy(Trust):
 
     def __init__(self, output_queue, peer_identifier: str, strategy: Strategy, config: ConfigParser,
-                 trust_params: dict, ipaddress: str):
+                 trust_params: dict, ipaddress: str, data_dir: str):
         self.strategy = strategy
         self.name = peer_identifier
         self.ipaddress = ipaddress
@@ -41,7 +41,8 @@ class PeerWithStrategy(Trust):
                                  start_pigeon=False,
                                  rename_redis_ip_info=True,
                                  rename_sql_db_file=True,
-                                 name_suffix=str(trust_params["pigeon_port"]))
+                                 name_suffix=str(trust_params["pigeon_port"]),
+                                 data_dir=data_dir)
 
             self.parent.start()
 

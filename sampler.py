@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-class Attack(enum.Enum):
+class Attack(str, enum.Enum):
     Benign = 0
     GeneralAttack = 1
     TargetedAttack = 2
