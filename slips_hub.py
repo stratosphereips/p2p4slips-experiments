@@ -17,7 +17,7 @@ class SlipsHub():
     def __init__(self, ipdb: IPDatabase):
         self.sampler = Sampler()
         self.ipdb = ipdb
-        self.control_peer_names = ["good_guy_0"]
+        self.control_peer_ips = ["1.1.1.0"]
         self.observed_ips = ["1.1.1.3"]
         self.observations = {}
 
@@ -46,8 +46,8 @@ class SlipsHub():
             interactions = self.sampler.get_last_interactions_of_peer(peer)
             self.process_interactions(peer, interactions)
 
-    def process_interactions(self, peer_name: str, interactions: dict):
-        port = self.ipdb.names[peer_name].port
+    def process_interactions(self, peer_ip: str, interactions: dict):
+        port = self.ipdb.ips[peer_ip].port
         storage_name = "IPsInfo" + str(port)
 
         for attacker_ip_address, interaction in interactions.items():
@@ -66,8 +66,8 @@ class SlipsHub():
 
         # for peer in list
         # send message to that peers request channel
-        for peer_name in self.control_peer_names:
-            peer = self.ipdb.names[peer_name]
+        for peer_ip in self.control_peer_ips:
+            peer = self.ipdb.ips[peer_ip]
             request_channel = "p2p_data_request" + str(peer.port)
             for ip in self.observed_ips:
                 publish_str_to_channel(request_channel, ip + " 0")
@@ -76,14 +76,14 @@ class SlipsHub():
         time.sleep(3)
         
         # collect data from that peers database
-        for peer_name in self.control_peer_names:
-            round_results[peer_name] = {}
-            peer = self.ipdb.names[peer_name]
+        for peer_ip in self.control_peer_ips:
+            round_results[peer_ip] = {}
+            peer = self.ipdb.ips[peer_ip]
             storage_name = "IPsInfo" + str(peer.port)
             for ip in self.observed_ips:
                 nscore, nconfidence = get_network_score_confidence(storage_name, ip)
                 score, confidence = self.get_score_confidence(ip, storage_name)
-                round_results[peer_name][ip] = (nscore, nconfidence, score, confidence)
+                round_results[peer_ip][ip] = (nscore, nconfidence, score, confidence)
                 print("HUUUUUUUU", nscore, nconfidence)
 
         self.observations[round] = round_results
