@@ -89,3 +89,6 @@ class Controller:
         if action == NetworkUpdate.Leave:
             self.ipdb.deactivate_peer(peer)
             return
+
+    def export_experiment_data(self):
+        pass

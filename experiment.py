@@ -10,7 +10,7 @@ from experimental_printer import Printer
 from ipdb import IPDatabase
 from peerwithstrategy import PeerWithStrategy
 from sampler import Sampler, Attack
-from setups import get_basic_experiment
+from setups import get_basic_experiment, get_idtrust_experiment_1
 from slips_hub import SlipsHub
 from strategies.strategy_benign import StrategyBeNice
 from strategies.strategy_attack_all import StrategyAttackAll
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     __database__.setOutputQueue(output_process_queue)
     config = get_default_config()
 
-    ctrl = get_basic_experiment(output_process_queue, config)
+    ctrl = get_idtrust_experiment_1(output_process_queue, config)
 
     ctrl.run_experiment()
 

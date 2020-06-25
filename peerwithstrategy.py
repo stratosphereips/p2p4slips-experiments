@@ -42,6 +42,7 @@ class PeerWithStrategy(Trust):
                                  rename_redis_ip_info=True,
                                  rename_sql_db_file=True,
                                  name_suffix=str(trust_params["pigeon_port"]))
+
             self.parent.start()
 
         self.is_good = self.strategy.is_good
