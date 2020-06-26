@@ -59,7 +59,7 @@ class Setups:
         strategy = StrategyAttackTargetList(good_peer_ips[1:])
         peer = PeerWithStrategy(output_process_queue, name, strategy, config, {"pigeon_port": port}, ip, self.data_dir)
         peers.append(peer)
-        ctrl = Controller(peers, 1, ["1.1.1.0"], ["1.1.1.10"])
+        ctrl = Controller(peers, 30, ["1.1.1.0"], ["1.1.1.10"])
         return ctrl
 
     def will_they_block_benign_device_2(self, output_process_queue, config):
