@@ -1,11 +1,11 @@
 import os
 import time
 
-base_dirname = "experiments-" + time.time()
+base_dirname = "experiments-" + str(time.time())
 os.mkdir(base_dirname)
 
 for experiment_id in range(0, 3):
+    print("Starting experiment: " + str(experiment_id))
     data_dir = base_dirname + "/" + str(experiment_id) + "/"
     os.mkdir(data_dir)
-    target = "8.8.8.87"
-    os.system('ping ' + experiment_id + '&> tmp/Output.txt')
+    os.system('python3 main.py ' + str(experiment_id) + " " + data_dir + '&> ' + data_dir + 'std_out.txt')

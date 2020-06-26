@@ -57,12 +57,17 @@ class Controller:
         evaluate(self.hub.observations, self.ipdb, self.rounds)
         self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
 
+        time.sleep(1)
+        for peer in self.peers:
+            publish_str_to_channel("ip_info_change" + str(peer.port), "stop_process")
+            self.dovecot.kill()
+
     def run_experiment_ids_only(self):
 
         # wait so channels don't start sending data too early
         time.sleep(1)
         for peer in self.peers:
-            publish_str_to_channel("ip_info_change_" + str(peer.port), "stop_process")
+            publish_str_to_channel("ip_info_change" + str(peer.port), "stop_process")
         time.sleep(1)
 
         for rnd in range(0, self.rounds):
