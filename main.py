@@ -21,12 +21,12 @@ def get_default_config():
     return cfg
 
 
-def save_exp_data(ctrl: Controller):
+def save_exp_data(ctrl: Controller, filename):
     round_results = ctrl.hub.observations
     attack_history = ctrl.attack_history
     data = {"round_results": round_results, "attack_history": attack_history}
 
-    with open('data.txt', 'w') as outfile:
+    with open(filename + "data.txt", 'w') as outfile:
         json.dump(data, outfile)
 
 
@@ -50,4 +50,4 @@ if __name__ == '__main__':
     ctrl.run_experiment()
     output_process_thread.kill()
 
-    save_exp_data(ctrl)
+    save_exp_data(ctrl, data_dir)

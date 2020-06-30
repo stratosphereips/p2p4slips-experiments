@@ -4,6 +4,7 @@ from strategies.peer_lie_everyone_is_good import PeerLiarEveryoneIsGood
 from strategies.strategy_attack_all import StrategyAttackAll
 from strategies.strategy_attack_target import StrategyAttackTarget
 from strategies.strategy_attack_target_list import StrategyAttackTargetList
+from strategies.strategy_attacker_exp1 import StrategyAttackExp1
 from strategies.strategy_attacker_random import StrategyAttackRandomAndLie
 from strategies.strategy_benign_peer import StrategyBenignPeer
 
@@ -56,7 +57,7 @@ class Setups:
         name = "bad_guy_" + str(i)
         ip = "1.1.1." + str(i)
         port = 6660 + i
-        strategy = StrategyAttackTargetList(good_peer_ips[1:])
+        strategy = StrategyAttackExp1(good_peer_ips[1:])
         peer = PeerWithStrategy(output_process_queue, name, strategy, config, {"pigeon_port": port}, ip, self.data_dir)
         peers.append(peer)
         ctrl = Controller(peers, 30, ["1.1.1.0"], ["1.1.1.10"])
