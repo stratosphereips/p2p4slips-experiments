@@ -82,7 +82,7 @@ class Setups:
         name = "good_device_" + str(i)
         ip = "1.1.1." + str(i)
         port = 6660 + i
-        strategy = StrategyAttackTargetList(good_peer_ips[1:])
+        strategy = StrategyAttackExp1(good_peer_ips[1:])
         peer = PeerWithStrategy(output_process_queue, name, strategy, config, {"pigeon_port": port}, ip, self.data_dir)
         peers.append(peer)
 
@@ -118,7 +118,7 @@ class Setups:
         name = "good_device_" + str(i)
         ip = "1.1.1." + str(i)
         port = 6660 + i
-        strategy = StrategyAttackTargetList(good_peer_ips[1:])
+        strategy = StrategyAttackExp1(good_peer_ips[1:])
         peer = PeerWithStrategy(output_process_queue, name, strategy, config, {"pigeon_port": port}, ip, self.data_dir)
         peers.append(peer)
 
