@@ -13,18 +13,20 @@ class PeerLiarEveryoneIsGood(Strategy):
         self.do_p2p = True
         # prepare variables
         self.module_process = None
-        self.go_listener = None
+        self.go_listener = "hello"
         self.pygo_channel = ""
         self.storage_name = ""
         self.good_peer_list = []
+        print("STARTING LIAR PEER")
 
     def set_module_process(self, module_process):
         self.module_process = module_process
-        print("Type in set", type(module_process))
+        print("setting go listener")
 
         self.go_listener = module_process.go_listener_process
         self.pygo_channel = module_process.pygo_channel
         self.storage_name = module_process.storage_name
+        print(self.go_listener)
 
     def set_good_peer_list(self, victim_list):
         self.good_peer_list = victim_list
@@ -48,6 +50,7 @@ class PeerLiarEveryoneIsGood(Strategy):
         pass
 
     def respond_to_message_request(self, key, reporter):
+        print("ALTERING REPORT DATA")
         self.go_listener.send_evaluation_to_go(key, 1, 1, reporter, self.pygo_channel)
 
     def process_message_report(self, reporter: str, report_time: int, data: dict):

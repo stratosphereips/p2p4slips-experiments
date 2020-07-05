@@ -28,6 +28,7 @@ class PeerWithStrategy(Trust):
         self.active = False
 
         if self.strategy.do_p2p:
+
             self.parent = super()
             self.parent.__init__(output_queue,
                                  config,
@@ -42,7 +43,8 @@ class PeerWithStrategy(Trust):
                                  rename_redis_ip_info=True,
                                  rename_sql_db_file=True,
                                  name_suffix=str(trust_params["pigeon_port"]),
-                                 data_dir=data_dir)
+                                 data_dir=data_dir,
+                                 override_p2p=True)
 
             self.parent.start()
 
@@ -72,3 +74,12 @@ class PeerWithStrategy(Trust):
             self.strategy.handle_data_request(message_data)
         else:
             self.parent.handle_data_request(message_data)
+
+    def respond_to_message_request(self, key, reporter):
+        print("Strategy is", self.strategy)
+        self.strategy.respond_to_message_request(key, reporter)
+        try:
+            self.strategy.respond_to_message_request(key, reporter)
+            print("Peer with port", self.port, "has custom response function")
+        except:
+            print("Peer with port", self.port, "doesn't have custom response function")

@@ -19,7 +19,7 @@ class StrategyAttackRandomAndLie(Strategy):
     
     def set_module_process(self, module_process):
         self.module_process = module_process
-        print("Type in set", type(module_process))
+        #print("Type in set", type(module_process))
 
         self.go_listener = module_process.go_listener_process
         self.pygo_channel = module_process.pygo_channel

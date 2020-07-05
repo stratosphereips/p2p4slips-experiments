@@ -11,8 +11,9 @@ class StrategyAttackExp1(Strategy):
         self.override_handle_update = True
         self.override_handle_data_request = True
         self.is_good = False
-        self.do_p2p = False
+        self.do_p2p = True
         self.start_wide_attack_at_round = 15
+        print("Starting liar strategy")
 
     def on_round_start(self, round_no: int):
         if round_no == 0:
@@ -40,3 +41,7 @@ class StrategyAttackExp1(Strategy):
 
     def handle_data_request(self, message_data: str):
         pass
+
+    def respond_to_message_request(self, key, reporter):
+        print("ALTERING REPORT DATA")
+        self.go_listener.send_evaluation_to_go(key, 1, 1, reporter, self.pygo_channel)

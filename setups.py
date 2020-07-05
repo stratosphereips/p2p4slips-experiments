@@ -1,3 +1,5 @@
+import time
+
 from controller import Controller
 from peerwithstrategy import PeerWithStrategy
 from strategies.peer_lie_everyone_is_good import PeerLiarEveryoneIsGood
@@ -7,6 +9,7 @@ from strategies.strategy_attack_target_list import StrategyAttackTargetList
 from strategies.strategy_attacker_exp1 import StrategyAttackExp1
 from strategies.strategy_attacker_random import StrategyAttackRandomAndLie
 from strategies.strategy_benign_peer import StrategyBenignPeer
+from strategies.strategy_malicious_deviceA import StrategyMaliciousDeviceA
 
 
 class Setups:
@@ -69,7 +72,7 @@ class Setups:
         good_peer_ips = []
 
         # the good peers:
-        for i in range(0, 5):
+        for i in range(0, 1):
             name = "good_guy_" + str(i)
             ip = "1.1.1." + str(i)
             port = 6660 + i
@@ -79,21 +82,24 @@ class Setups:
             good_peer_ips.append(ip)
 
         i = 6
-        name = "good_device_" + str(i)
+        name = "bad_device_" + str(i)
         ip = "1.1.1." + str(i)
         port = 6660 + i
-        strategy = StrategyAttackExp1(good_peer_ips[1:])
+        strategy = StrategyMaliciousDeviceA(good_peer_ips[1:])
         peer = PeerWithStrategy(output_process_queue, name, strategy, config, {"pigeon_port": port}, ip, self.data_dir)
         peers.append(peer)
 
         # the bad peers:
-        for i in range(7, 9):
-            name = "bad_guy_" + str(i)
+        for i in range(7, 8):
+            name = "bad_peer_" + str(i)
             ip = "1.1.1." + str(i)
             port = 6660 + i
             strategy = PeerLiarEveryoneIsGood()
             peer = PeerWithStrategy(output_process_queue, name, strategy, config, {"pigeon_port": port}, ip, self.data_dir)
             strategy.set_module_process(peer)
+            peer.strategy.set_module_process(peer)
+            peer.strategy = strategy
+
             peers.append(peer)
 
         ctrl = Controller(peers, 30, ["1.1.1.0"], ["1.1.1.6"])
@@ -132,6 +138,7 @@ class Setups:
             strategy.set_module_process(peer)
             peers.append(peer)
 
+        time.sleep(1)
         ctrl = Controller(peers, 30, ["1.1.1.0"], ["1.1.1.6"])
         return ctrl
 

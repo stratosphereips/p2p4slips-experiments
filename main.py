@@ -1,4 +1,5 @@
 # the experiment class, that initializes all other things and calls iterations
+import time
 from configparser import ConfigParser
 from multiprocessing import Queue
 
@@ -31,10 +32,19 @@ def save_exp_data(ctrl: Controller, filename):
 
 
 if __name__ == '__main__':
-    argv = sys.argv[1:]
-    experiment_id = int(argv[0])
-    data_dir = argv[1]
+    try:
+        argv = sys.argv[1:]
+        experiment_id = int(argv[0])
+        data_dir = argv[1]
+    except:
+        print("No parameters provided, starting default settings")
+        experiment_id = 1
+        base_dir = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/experiments-" + str(time.time()) + "/"
+        os.mkdir(base_dir)
+        data_dir = base_dir + str(experiment_id) + "/"
+        os.mkdir(data_dir)
 
+    print(data_dir)
     config = get_default_config()
     output_process_queue = Queue()
     output_process_thread = OutputProcess(output_process_queue, 1, 1, config)

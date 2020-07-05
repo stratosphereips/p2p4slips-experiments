@@ -127,7 +127,7 @@ def show_score_graphs(data, victim_name, remote_peer_ip_address):
 
     di_accuracy = 0
     dc_accuracy = 0
-    for di, dc in zip (decision_ips, decision_combined):
+    for di, dc in zip(decision_ips, decision_combined):
         if di < -0.5:
             di_accuracy += 1
         if dc < -0.5:
@@ -149,4 +149,5 @@ def show_score_graphs(data, victim_name, remote_peer_ip_address):
     plt.show()
 
 
-show_score_graphs(data0, "1.1.1.0", "1.1.1.10")
+# show_score_graphs(data0, "1.1.1.0", "1.1.1.10")
+show_score_graphs(data1, "1.1.1.0", "1.1.1.6")
