@@ -27,22 +27,24 @@ class Setups:
                         rename_redis_ip_info=True,
                         rename_sql_db_file=True,
                         data_dir=data_dir,
-                        ip_address="1.1.1.0")
+                        ip_address="1.1.1.0",
+                        name="0_peer_benign")
 
         # later, this device will be malicious
-        p1 = BenignDevice()
+        p1 = BenignDevice(ip_address="1.1.1.1", name="1_device_malicious", port=6661)
 
         p2 = PeerLiarEveryoneIsGood(output_process_queue,
                                     config,
-                                    pigeon_port=6660,
+                                    pigeon_port=6662,
                                     rename_with_port=True,
                                     start_pigeon=False,
                                     rename_redis_ip_info=True,
                                     rename_sql_db_file=True,
                                     data_dir=data_dir,
-                                    ip_address="1.1.1.2")
+                                    ip_address="1.1.1.2",
+                                    name="2_peer_malicious")
 
         peers = [p0, p1, p2]
 
-        ctrl = Controller(peers, 5, ["1.1.1.0"], ["1.1.1.3"])
+        ctrl = Controller(peers, 3, ["1.1.1.0"], ["1.1.1.1"])
         return ctrl

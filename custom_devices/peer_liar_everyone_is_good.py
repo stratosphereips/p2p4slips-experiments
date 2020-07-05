@@ -99,7 +99,7 @@ class PeerLiarEveryoneIsGood(Module, multiprocessing.Process, Device):
         self.p2p_data_request_channel = self.p2p_data_request_channel_raw + str_port
         self.gopy_channel = self.gopy_channel_raw + str_port
         self.pygo_channel = self.pygo_channel_raw + str_port
-        self.pigeon_logfile = self.pigeon_logfile_raw + str_port
+        self.pigeon_logfile = data_dir + self.pigeon_logfile_raw + str_port
 
         self.storage_name = "IPsInfo"
         if rename_redis_ip_info:
@@ -133,15 +133,14 @@ class PeerLiarEveryoneIsGood(Module, multiprocessing.Process, Device):
                                                           gopy_channel=self.gopy_channel, pygo_channel=self.pygo_channel)
         self.go_listener_process.start()
 
-        outfile = open(self.pigeon_logfile, "+w")
-        executable = ["/home/dita/ownCloud/m4.semestr/go/src/github.com/stratosphereips/p2p4slips/p2p4slips"]
-        port_param = ["-port", str(self.port)]
-        keyfile_param = ["-key-file", "fofobarbarkeys"]
-        rename_with_port_param = ["-rename-with-port", str(self.rename_with_port).lower()]
-        pygo_channel_param = ["-redis-channel-pygo", self.pygo_channel_raw]
-        gopy_channel_param = ["-redis-channel-gopy", self.gopy_channel_raw]
-
         if self.start_pigeon:
+            outfile = open(self.pigeon_logfile, "+w")
+            executable = ["/home/dita/ownCloud/m4.semestr/go/src/github.com/stratosphereips/p2p4slips/p2p4slips"]
+            port_param = ["-port", str(self.port)]
+            keyfile_param = ["-key-file", "fofobarbarkeys"]
+            rename_with_port_param = ["-rename-with-port", str(self.rename_with_port).lower()]
+            pygo_channel_param = ["-redis-channel-pygo", self.pygo_channel_raw]
+            gopy_channel_param = ["-redis-channel-gopy", self.gopy_channel_raw]
             executable.extend(port_param)
             executable.extend(keyfile_param)
             executable.extend(rename_with_port_param)

@@ -27,3 +27,4 @@ if __name__ == '__main__':
     os.mkdir(base_dir)
     setups = Setups(base_dir)
     experiment = setups.get_experiment(0, output_process_queue, config)
+    # TODO: run the experiment
