@@ -9,10 +9,7 @@ import os
 sys.path.append(os.getcwd() + '/../../..')
 
 # this imports files from the p2ptrust slips module
-from modules.p2ptrust.trustdb import TrustDB
 from modules.p2ptrust.p2ptrust import Trust
-from modules.p2ptrust.trust_model import TrustModel
-from modules.p2ptrust.printer import Printer
 
 from strategies.basic_strategy import Strategy
 

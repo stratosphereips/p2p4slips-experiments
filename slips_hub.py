@@ -10,7 +10,7 @@ import os
 from utils import update_slips_scores, publish_str_to_channel, get_network_score_confidence
 
 sys.path.append(os.getcwd() + '/../../..')
-from modules.p2ptrust.utils import get_ip_info_from_slips
+from p2ptrust.utils.utils import get_ip_info_from_slips
 
 
 class SlipsHub():
