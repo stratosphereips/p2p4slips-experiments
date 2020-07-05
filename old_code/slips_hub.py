@@ -1,9 +1,15 @@
 import time
 
+from ipdb import IPDatabase
+from sampler import Sampler
+
 # make imports from parent directory possible
-from p2ptrust.testing.experiments.ipdb import IPDatabase
-from p2ptrust.testing.experiments.sampler import Sampler
-from p2ptrust.testing.experiments.utils import update_slips_scores, publish_str_to_channel, get_network_score_confidence
+import sys
+import os
+# we need to go all the way up, because modules import slips-wide stuff
+from utils import update_slips_scores, publish_str_to_channel, get_network_score_confidence
+
+sys.path.append(os.getcwd() + '/../../..')
 from p2ptrust.utils.utils import get_ip_info_from_slips
 
 

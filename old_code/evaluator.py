@@ -1,5 +1,4 @@
-from p2ptrust.testing.experiments.ipdb import IPDatabase
-
+from ipdb import IPDatabase
 threshold = -0.5
 
 

@@ -1,12 +1,12 @@
 import time
 import copy
 
-from p2ptrust.testing.experiments.custom_devices.device import Device
-from p2ptrust.testing.experiments.dovecot import Dovecot
-from p2ptrust.testing.experiments.evaluator import evaluate
-from p2ptrust.testing.experiments.ipdb import IPDatabase
-from p2ptrust.testing.experiments.slips_hub import SlipsHub
-from p2ptrust.testing.experiments.utils import publish_str_to_channel, NetworkUpdate
+from dovecot import Dovecot
+from evaluator import evaluate
+from ipdb import IPDatabase
+from peerwithstrategy import PeerWithStrategy
+from slips_hub import SlipsHub
+from utils import NetworkUpdate, publish_str_to_channel
 
 
 class Controller:
@@ -78,7 +78,7 @@ class Controller:
 
         self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
 
-    def process_round_start(self, peer: Device, action: NetworkUpdate, params: str):
+    def process_round_start(self, peer: PeerWithStrategy, action: NetworkUpdate, params: str):
         if action == NetworkUpdate.Stay:
             return
         if action == NetworkUpdate.JoinWithNewIp:
@@ -86,7 +86,7 @@ class Controller:
             self.dovecot.peer_data_update(peer)
             return
         if action == NetworkUpdate.JoinWithSameIp:
-            self.ipdb.activate_peer_on_ip(peer, peer.ip_address)
+            self.ipdb.activate_peer_on_ip(peer, peer.ipaddress)
             self.dovecot.peer_data_update(peer)
             return
         if action == NetworkUpdate.ChangeIp:
