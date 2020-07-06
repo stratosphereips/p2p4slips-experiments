@@ -263,6 +263,7 @@ class PeerBenign(Module, multiprocessing.Process, Device):
         :param message_data: The data received from the redis channel `p2p_data_response`
         :return: None, the result is saved into the redis database under key `p2p4slips`
         """
+        print("handle data request")
 
         # make sure that IP address is valid and cache age is a valid timestamp from the past
         ip_address, cache_age = validate_slips_data(message_data)

@@ -30,6 +30,7 @@ class Setups:
                         data_dir=data_dir,
                         ip_address="1.1.1.0",
                         name="0_peer_benign")
+        p0.start()
 
         # later, this device will be malicious
         p1 = DeviceMalicious(ip_address="1.1.1.1", name="1_device_malicious", port=6661)
@@ -44,6 +45,7 @@ class Setups:
                                     data_dir=data_dir,
                                     ip_address="1.1.1.2",
                                     name="2_peer_malicious")
+        p2.start()
 
         peers = [p0, p1, p2]
 

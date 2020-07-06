@@ -29,3 +29,4 @@ if __name__ == '__main__':
     experiment = setups.get_experiment(0, output_process_queue, config)
     # TODO: run the experiment
     experiment.run_experiment()
+    output_process_thread.kill()
