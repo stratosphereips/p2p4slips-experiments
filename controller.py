@@ -47,7 +47,7 @@ class Controller:
 
             attacks = {}
             for peer in self.peers:
-                attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.ips.keys())
+                attacks[peer.ip_address] = peer.choose_round_behavior(rnd, self.ipdb.ips.keys())
             self.hub.run_detections(rnd, attacks)
             time.sleep(1)
             self.hub.collect_data(rnd)

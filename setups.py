@@ -2,7 +2,8 @@ import configparser
 import os
 
 from p2ptrust.testing.experiments.controller import Controller
-from p2ptrust.testing.experiments.custom_devices.benign_device import BenignDevice
+from p2ptrust.testing.experiments.custom_devices.device_benign import DeviceBenign
+from p2ptrust.testing.experiments.custom_devices.device_malicious import DeviceMalicious
 from p2ptrust.testing.experiments.custom_devices.peer_benign import PeerBenign
 from p2ptrust.testing.experiments.custom_devices.peer_liar_everyone_is_good import PeerLiarEveryoneIsGood
 from p2ptrust.utils.utils import read_configuration
@@ -31,7 +32,7 @@ class Setups:
                         name="0_peer_benign")
 
         # later, this device will be malicious
-        p1 = BenignDevice(ip_address="1.1.1.1", name="1_device_malicious", port=6661)
+        p1 = DeviceMalicious(ip_address="1.1.1.1", name="1_device_malicious", port=6661)
 
         p2 = PeerLiarEveryoneIsGood(output_process_queue,
                                     config,

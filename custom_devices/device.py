@@ -1,5 +1,6 @@
 class Device:
     def __init__(self, ip_address="0.0.0.0"):
+        self.is_good = True
         self.ip_address = ip_address
 
     def on_round_start(self, round_no: int):

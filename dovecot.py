@@ -104,7 +104,7 @@ class Dovecot(multiprocessing.Process):
 
     def notify_at_round_start(self):
         for peer in self.recently_updated_peers:
-            update_data = {"peerid": peer.name, "reliability": 1, "timestamp": time.time(), "ip": peer.ipaddress}
+            update_data = {"peerid": peer.name, "reliability": 1, "timestamp": time.time(), "ip": peer.ip_address}
             update_message = {"message_type": "peer_update", "message_contents": update_data}
             message = json.dumps(update_message)
 

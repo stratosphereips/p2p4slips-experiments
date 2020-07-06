@@ -2,7 +2,7 @@ from p2ptrust.testing.experiments.sampler import Attack
 from p2ptrust.testing.experiments.utils import NetworkUpdate
 
 
-class BenignDevice:
+class DeviceBenign:
     def __init__(self, ip_address="0.0.0.0", name="", port=0):
         self.ip_address = ip_address
         self.name = name

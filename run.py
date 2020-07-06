@@ -28,3 +28,4 @@ if __name__ == '__main__':
     setups = Setups(base_dir)
     experiment = setups.get_experiment(0, output_process_queue, config)
     # TODO: run the experiment
+    experiment.run_experiment()

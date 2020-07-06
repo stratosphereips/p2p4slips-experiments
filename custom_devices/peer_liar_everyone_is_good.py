@@ -69,6 +69,7 @@ class PeerLiarEveryoneIsGood(Module, multiprocessing.Process, Device):
 
         self.ip_address = ip_address
         self.name = name
+        self.is_good = False
         self.output_queue = output_queue
         # In case you need to read the slips.conf configuration file for your own configurations
         self.config = config
