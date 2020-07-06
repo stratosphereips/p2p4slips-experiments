@@ -47,5 +47,5 @@ class Setups:
 
         peers = [p0, p1, p2]
 
-        ctrl = Controller(peers, 3, ["1.1.1.0"], ["1.1.1.1"])
+        ctrl = Controller(peers, 3, ["1.1.1.0"], ["1.1.1.1"], data_dir)
         return ctrl

@@ -23,7 +23,7 @@ if __name__ == '__main__':
     __database__.start(config)
     __database__.setOutputQueue(output_process_queue)
 
-    base_dir = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiment-" + str(time.time()) + "/"
+    base_dir = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-" + str(time.time()) + "/"
     os.mkdir(base_dir)
     setups = Setups(base_dir)
     experiment = setups.get_experiment(0, output_process_queue, config)

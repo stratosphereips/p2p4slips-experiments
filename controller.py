@@ -1,5 +1,6 @@
 import time
 import copy
+import json
 
 from p2ptrust.testing.experiments.custom_devices.device import Device
 from p2ptrust.testing.experiments.dovecot import Dovecot
@@ -10,9 +11,10 @@ from p2ptrust.testing.experiments.utils import publish_str_to_channel, NetworkUp
 
 
 class Controller:
-    def __init__(self, peers: list, rounds: int, control_ips: list, observed_ips: list, timeouts: int = 5):
+    def __init__(self, peers: list, rounds: int, control_ips: list, observed_ips: list, data_dir, timeouts: int = 5):
         self.peers = peers
         self.rounds = rounds
+        self.data_dir = data_dir
         self.timeouts = timeouts
         self.ipdb = IPDatabase(self.peers)
         self.control_ips = control_ips
@@ -61,6 +63,7 @@ class Controller:
         for peer in self.peers:
             publish_str_to_channel("ip_info_change" + str(peer.port), "stop_process")
             self.dovecot.kill()
+        self.export_experiment_data()
 
     def run_experiment_ids_only(self):
 
@@ -98,4 +101,11 @@ class Controller:
             return
 
     def export_experiment_data(self):
-        pass
+        round_results = self.hub.observations
+        attack_history = self.attack_history
+
+        with open(self.data_dir + "round_results.txt", 'w') as outfile:
+            json.dump(round_results, outfile)
+
+        with open(self.data_dir + "attack_history.txt", 'w') as outfile:
+            json.dump(attack_history, outfile)
