@@ -6,8 +6,8 @@ import subprocess
 import time
 
 from p2ptrust.testing.experiments.custom_devices.device import Device
-from p2ptrust.testing.experiments.old_code.sampler import Attack
-from p2ptrust.testing.experiments.old_code.utils import NetworkUpdate
+from p2ptrust.testing.experiments.sampler import Attack
+from p2ptrust.testing.experiments.utils import NetworkUpdate
 from slips.core.database import __database__
 from slips.common.abstracts import Module
 
