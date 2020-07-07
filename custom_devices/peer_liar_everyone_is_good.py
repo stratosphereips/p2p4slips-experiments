@@ -70,6 +70,7 @@ class PeerLiarEveryoneIsGood(Module, multiprocessing.Process, Device):
         self.ip_address = ip_address
         self.name = name
         self.is_good = False
+        self.override_p2p = True
         self.output_queue = output_queue
         # In case you need to read the slips.conf configuration file for your own configurations
         self.config = config
@@ -87,7 +88,6 @@ class PeerLiarEveryoneIsGood(Module, multiprocessing.Process, Device):
         self.pygo_channel_raw = pygo_channel
         self.pigeon_logfile_raw = pigeon_logfile
         self.start_pigeon = start_pigeon
-        self.override_p2p = override_p2p
 
         if self.rename_with_port:
             str_port = str(self.port)
@@ -130,8 +130,15 @@ class PeerLiarEveryoneIsGood(Module, multiprocessing.Process, Device):
         self.trust_db = trustdb.TrustDB(sql_db_name, self.printer, drop_tables_on_startup=True)
         self.reputation_model = reputation_model.TrustModel(self.printer, self.trust_db, self.config)
 
-        self.go_listener_process = go_listener.GoListener(self.printer, self.trust_db, self.config, self.storage_name, self,
-                                                          gopy_channel=self.gopy_channel, pygo_channel=self.pygo_channel)
+        self.go_listener_process = go_listener.GoListener(self.printer,
+                                                          self.trust_db,
+                                                          self.config,
+                                                          self.storage_name,
+                                                          override_p2p=self.override_p2p,
+                                                          report_func=self.process_message_report,
+                                                          request_func=self.respond_to_message_request,
+                                                          gopy_channel=self.gopy_channel,
+                                                          pygo_channel=self.pygo_channel)
         self.go_listener_process.start()
 
         if self.start_pigeon:
@@ -245,6 +252,8 @@ class PeerLiarEveryoneIsGood(Module, multiprocessing.Process, Device):
 
     def respond_to_message_request(self, key, reporter):
         print("message request in parent was called")
+        # time.sleep(100)
+        self.go_listener_process.send_evaluation_to_go(key, 1, 1, reporter)
         pass
 
     def process_message_report(self, reporter: str, report_time: int, data: dict):

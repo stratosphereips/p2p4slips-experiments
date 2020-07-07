@@ -130,7 +130,7 @@ class PeerBenign(Module, multiprocessing.Process, Device):
         self.reputation_model = reputation_model.TrustModel(self.printer, self.trust_db, self.config)
 
         self.go_listener_process = go_listener.GoListener(self.printer, self.trust_db, self.config, self.storage_name,
-                                                          self,
+                                                          override_p2p=override_p2p,
                                                           gopy_channel=self.gopy_channel,
                                                           pygo_channel=self.pygo_channel)
         self.go_listener_process.start()
