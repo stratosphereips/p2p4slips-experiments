@@ -40,6 +40,7 @@ class Setups:
                                     pigeon_port=6662,
                                     rename_with_port=True,
                                     start_pigeon=False,
+                                    override_p2p=True,
                                     rename_redis_ip_info=True,
                                     rename_sql_db_file=True,
                                     data_dir=data_dir,
