@@ -1,10 +1,6 @@
 import multiprocessing
 import configparser
-from p2ptrust.p2ptrust import Trust
-from p2ptrust.testing.experiments.custom_devices.device import Device
 from p2ptrust.testing.experiments.custom_devices.peer import Peer
-from p2ptrust.testing.experiments.sampler import Attack
-from p2ptrust.testing.experiments.utils import NetworkUpdate
 
 
 class PeerLiarEveryoneIsGood(Peer):
@@ -22,10 +18,6 @@ class PeerLiarEveryoneIsGood(Peer):
                          port=port,
                          ip_address=ip_address,
                          data_dir=data_dir,
-                         rename_with_port=True,
-                         start_pigeon=False,
-                         rename_redis_ip_info=True,
-                         rename_sql_db_file=True,
                          override_p2p=True,
                          name=name)
 

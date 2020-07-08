@@ -18,10 +18,6 @@ class PeerBenign(Peer):
                          port=port,
                          ip_address=ip_address,
                          data_dir=data_dir,
-                         rename_with_port=True,
-                         start_pigeon=False,
-                         rename_redis_ip_info=True,
-                         rename_sql_db_file=True,
                          override_p2p=False,
                          name=name)
 
