@@ -20,14 +20,10 @@ class Setups:
     def get_test_experiment(self, identifier: int, output_process_queue, config: configparser.ConfigParser):
         data_dir = self.data_dir + str(identifier) + "/"
         os.mkdir(data_dir)
-        p0 = PeerBenign(output_process_queue,
-                        config,
-                        pigeon_port=6660,
-                        rename_with_port=True,
-                        start_pigeon=False,
-                        rename_redis_ip_info=True,
-                        rename_sql_db_file=True,
+        p0 = PeerBenign(output_queue=output_process_queue,
+                        config=config,
                         data_dir=data_dir,
+                        port=6660,
                         ip_address="1.1.1.0",
                         name="0_peer_benign")
         p0.start()
