@@ -6,7 +6,7 @@ from p2ptrust.testing.experiments.custom_devices.device import Device
 
 class Peer(Trust, multiprocessing.Process, Device):
     """
-           Trust(Module,Process)             Device(Object)
+       Trust(Module,Process)             Device(Object)
        (the trust module)              (a network entity)
                 |                        |           |
                 |                        |           |
@@ -40,6 +40,7 @@ class Peer(Trust, multiprocessing.Process, Device):
                  is_good=True):
         Device.__init__(self, ip_address, name, is_good)
 
+        self.is_peer = True
         self.port = port
         self.override_p2p = override_p2p
 

@@ -48,6 +48,7 @@ class Device:
         self.ip_address = ip_address
         self.name = name
         self.is_good = is_good
+        self.is_peer = False
 
     def on_round_start(self, round_no: int):
         if round_no == 0:

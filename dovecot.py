@@ -8,6 +8,8 @@ import time
 import multiprocessing
 import redis
 
+from p2ptrust.testing.experiments.custom_devices.device import Device
+
 
 class Dovecot(multiprocessing.Process):
 
@@ -85,8 +87,9 @@ class Dovecot(multiprocessing.Process):
         self.send_string_to_peer_name(source_peer_name, message_data["recipient"], message_str)
         pass
 
-    def peer_data_update(self, peer):
-        self.recently_updated_peers.append(peer)
+    def peer_data_update(self, peer: Device):
+        if peer.is_peer:
+            self.recently_updated_peers.append(peer)
 
     def get_sender_name_from_channel(self, channel):
         # read port from channel name and return the peer that owns this port
