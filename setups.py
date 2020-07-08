@@ -31,14 +31,9 @@ class Setups:
         # later, this device will be malicious
         p1 = DeviceMalicious(ip_address="1.1.1.1", name="1_device_malicious", port=6661)
 
-        p2 = PeerLiarEveryoneIsGood(output_process_queue,
-                                    config,
-                                    pigeon_port=6662,
-                                    rename_with_port=True,
-                                    start_pigeon=False,
-                                    override_p2p=True,
-                                    rename_redis_ip_info=True,
-                                    rename_sql_db_file=True,
+        p2 = PeerLiarEveryoneIsGood(output_queue=output_process_queue,
+                                    config=config,
+                                    port=6662,
                                     data_dir=data_dir,
                                     ip_address="1.1.1.2",
                                     name="2_peer_malicious")
