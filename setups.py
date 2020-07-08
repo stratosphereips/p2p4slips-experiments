@@ -2,11 +2,9 @@ import configparser
 import os
 
 from p2ptrust.testing.experiments.controller import Controller
-from p2ptrust.testing.experiments.custom_devices.device_benign import DeviceBenign
 from p2ptrust.testing.experiments.custom_devices.device_malicious import DeviceMalicious
-from p2ptrust.testing.experiments.custom_devices.peer_benign import PeerBenign
+from p2ptrust.testing.experiments.custom_devices.peer import Peer
 from p2ptrust.testing.experiments.custom_devices.peer_liar_everyone_is_good import PeerLiarEveryoneIsGood
-from p2ptrust.utils.utils import read_configuration
 
 
 class Setups:
@@ -20,12 +18,12 @@ class Setups:
     def get_test_experiment(self, identifier: int, output_process_queue, config: configparser.ConfigParser):
         data_dir = self.data_dir + str(identifier) + "/"
         os.mkdir(data_dir)
-        p0 = PeerBenign(output_queue=output_process_queue,
-                        config=config,
-                        data_dir=data_dir,
-                        port=6660,
-                        ip_address="1.1.1.0",
-                        name="0_peer_benign")
+        p0 = Peer(output_queue=output_process_queue,
+                  config=config,
+                  data_dir=data_dir,
+                  port=6660,
+                  ip_address="1.1.1.0",
+                  name="0_peer_benign")
         p0.start()
 
         # later, this device will be malicious
