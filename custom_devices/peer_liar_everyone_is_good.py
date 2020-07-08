@@ -1,46 +1,9 @@
 import multiprocessing
 import configparser
-import platform
-import signal
-import subprocess
-import time
-
 from p2ptrust.p2ptrust import Trust
 from p2ptrust.testing.experiments.custom_devices.device import Device
 from p2ptrust.testing.experiments.sampler import Attack
 from p2ptrust.testing.experiments.utils import NetworkUpdate
-from slips.core.database import __database__
-from slips.common.abstracts import Module
-
-import p2ptrust.trust.trustdb as trustdb
-from p2ptrust.utils.printer import Printer
-import p2ptrust.trust.trust_model as reputation_model
-import p2ptrust.utils.go_listener as go_listener
-import p2ptrust.utils.utils as utils
-
-
-def validate_slips_data(message_data: str) -> (str, int):
-    """
-    Check that message received from slips channel has correct format: ip, timeout
-
-    The message should contain an IP address (string), followed by a space and an integer timeout. If the message is
-    correct, the two values are returned as a tuple (str, int). If not, (None, None) is returned.
-    :param message_data: data from slips request channel
-    :return: parsed values or None tuple
-    """
-
-    try:
-        ip_address, time_since_cached = message_data.split(" ", 1)
-        time_since_cached = int(time_since_cached)
-
-        if not utils.validate_ip_address(ip_address):
-            return None, None
-
-        return ip_address, time_since_cached
-
-    except ValueError:
-        # message has wrong format
-        return None, None
 
 
 class PeerLiarEveryoneIsGood(Trust, multiprocessing.Process, Device):
@@ -78,7 +41,7 @@ class PeerLiarEveryoneIsGood(Trust, multiprocessing.Process, Device):
         self.gopy_channel_raw = gopy_channel
         self.pygo_channel_raw = pygo_channel
         self.rename_redis_ip_info = rename_redis_ip_info
-        self.rename_sql_db_file=rename_sql_db_file
+        self.rename_sql_db_file = rename_sql_db_file
         self.ip_address = ip_address
         self.name = name
         self.override_p2p = override_p2p
@@ -100,6 +63,9 @@ class PeerLiarEveryoneIsGood(Trust, multiprocessing.Process, Device):
         self.is_good = False
 
     def handle_data_request(self, params):
+        pass
+
+    def handle_update(self, ip_address: str) -> None:
         pass
 
     def respond_to_message_request(self, key, reporter):
