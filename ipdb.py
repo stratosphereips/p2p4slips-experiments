@@ -11,7 +11,10 @@ class IPDatabase:
         for peer in peers:
             self.ips[peer.ip_address] = peer
             self.names[peer.name] = peer
-            self.ports[peer.port] = peer
+            try:
+                self.ports[peer.port] = peer
+            except AttributeError:
+                print("Couldn't find port of " + peer.name)
 
     def update_ip(self, peer: Device, ip_address):
         if ip_address in self.ips.keys() and peer.ip_address != ip_address:

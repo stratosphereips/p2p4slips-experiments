@@ -1,5 +1,6 @@
 import multiprocessing
 import configparser
+
 from p2ptrust.testing.experiments.custom_devices.peer import Peer
 
 
@@ -36,15 +37,15 @@ class PeerLiarEveryoneIsGood(Peer):
                  ip_address: str,
                  name: str):
 
-        super().__init__(output_queue,
-                         config,
-                         port=port,
-                         ip_address=ip_address,
-                         data_dir=data_dir,
-                         override_p2p=True,
-                         name=name)
-
-        self.is_good = False
+        Peer.__init__(self,
+                      output_queue,
+                      config,
+                      port=port,
+                      ip_address=ip_address,
+                      data_dir=data_dir,
+                      override_p2p=True,
+                      name=name,
+                      is_good=False)
 
     def handle_data_request(self, params):
         pass

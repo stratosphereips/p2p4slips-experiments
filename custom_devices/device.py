@@ -44,11 +44,10 @@ class Device:
                                (a peer that can run attacks, but also cheat in the P2P network)
 
     """
-    def __init__(self, ip_address="0.0.0.0", name="", port=0):
+    def __init__(self, ip_address="0.0.0.0", name="", is_good=True):
         self.ip_address = ip_address
         self.name = name
-        self.port = port
-        self.is_good = True
+        self.is_good = is_good
 
     def on_round_start(self, round_no: int):
         if round_no == 0:

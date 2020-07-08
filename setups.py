@@ -27,7 +27,7 @@ class Setups:
         p0.start()
 
         # later, this device will be malicious
-        p1 = DeviceMalicious(ip_address="1.1.1.1", name="1_device_malicious", port=6661)
+        p1 = DeviceMalicious(ip_address="1.1.1.1", name="1_device_malicious", is_good=False)
 
         p2 = PeerLiarEveryoneIsGood(output_queue=output_process_queue,
                                     config=config,

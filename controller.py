@@ -23,7 +23,10 @@ class Controller:
 
         port_names = {}
         for peer in self.ipdb.peers:
-            port_names[peer.port] = peer.name
+            try:
+                port_names[peer.port] = peer.name
+            except:
+                pass
 
         new_port_names = copy.deepcopy(port_names)
         self.dovecot = Dovecot(new_port_names, "p2p_pygo", "p2p_gopy")
