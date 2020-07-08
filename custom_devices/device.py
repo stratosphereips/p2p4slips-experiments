@@ -1,13 +1,22 @@
+from p2ptrust.testing.experiments.sampler import Attack
+from p2ptrust.testing.experiments.utils import NetworkUpdate
+
+
 class Device:
-    def __init__(self, ip_address="0.0.0.0"):
-        self.is_good = True
+    def __init__(self, ip_address="0.0.0.0", name="", port=0):
         self.ip_address = ip_address
+        self.name = name
+        self.port = port
+        self.is_good = True
 
     def on_round_start(self, round_no: int):
-        raise NotImplementedError
+        if round_no == 0:
+            return NetworkUpdate.JoinWithSameIp, None
+        return None, None
 
-    def choose_round_behavior(self, round_no: int, peer_ids: list):
-        raise NotImplementedError
+    def choose_round_behavior(self, round_no: int, peer_ips: list):
+        attack_plan = dict.fromkeys(peer_ips, Attack.Benign)
+        return attack_plan
 
     def on_round_end(self, round_no: int):
-        raise NotImplementedError
+        pass
