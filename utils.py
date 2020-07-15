@@ -55,5 +55,6 @@ def init_experiments(base_dir):
     __database__.start(config)
     __database__.setOutputQueue(output_process_queue)
     base_dir = base_dir + str(time.time()) + "/"
-    os.mkdir(base_dir)
+    if not os.path.exists(base_dir):
+        os.mkdir(base_dir)
     return config, output_process_queue, output_process_thread, base_dir

@@ -106,16 +106,19 @@ class Setups:
         devices.append(p)
         k = 3
 
-        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.1"], data_dir)
+        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10"], data_dir)
         return ctrl
 
 
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
-    config, queue, queue_thread, base_dir = init_experiments(dirname)
 
-    s = Setups(base_dir)
-    ctrl = s.keep_malicious_device_unblocked(queue, config)
-    # ctrl = s.get_test_experiment(0, queue, config)
-    ctrl.run_experiment()
-    queue_thread.kill()
+    for n_malicious_peers in range(0, 10):
+        config, queue, queue_thread, base_dir = init_experiments(dirname)
+        s = Setups(base_dir)
+        print("Starting experiment", n_malicious_peers)
+        ctrl = s.keep_malicious_device_unblocked(queue, config, n_malicious_peers=n_malicious_peers, n_peers=10)
+        # ctrl = s.get_test_experiment(0, queue, config)
+        ctrl.run_experiment()
+        queue_thread.kill()
+        time.sleep(10)
