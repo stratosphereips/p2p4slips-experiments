@@ -82,6 +82,8 @@ class Setups:
                                            data_dir=data_dir,
                                            ip_address=ip_address,
                                            name=str(peerid) + "_peer_malicious")
+
+            p.start()
             devices.append(p)
 
         # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
@@ -110,8 +112,10 @@ class Setups:
 
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
-    config, queue, base_dir = init_experiments(dirname)
+    config, queue, queue_thread, base_dir = init_experiments(dirname)
 
     s = Setups(base_dir)
     ctrl = s.keep_malicious_device_unblocked(queue, config)
+    # ctrl = s.get_test_experiment(0, queue, config)
     ctrl.run_experiment()
+    queue_thread.kill()
