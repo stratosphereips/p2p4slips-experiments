@@ -10,6 +10,7 @@ from p2ptrust.testing.experiments.custom_devices.device_malicious import DeviceM
 from p2ptrust.testing.experiments.custom_devices.device_malicious_attack_target import DeviceMaliciousAttackTarget
 from p2ptrust.testing.experiments.custom_devices.peer import Peer
 from p2ptrust.testing.experiments.custom_devices.peer_liar_everyone_is_good import PeerLiarEveryoneIsGood
+from p2ptrust.testing.experiments.custom_devices.peer_liar_target_is_bad import PeerLiarTargetIsBad
 from p2ptrust.testing.experiments.utils import init_experiments
 from slips.core.database import __database__
 
@@ -55,11 +56,13 @@ class Setups:
         ctrl = Controller(peers, 3, ["1.1.1.0"], ["1.1.1.1"], data_dir)
         return ctrl
 
-    def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10, n_malicious_peers=3):
+    def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
+                                        n_malicious_peers=3):
         # how many attackers does it take to keep communicating with a malicious device?
         # there are 10 peers total, 0-9 of them are malicious.
         # There is a malicious device that is attacking everyone except peer 1
         # after 10 round, this device starts attacking everyone.
+        # there is also a benign device 11
         data_dir = self.data_dir + str(n_malicious_peers) + "_keep_malicious_device_unblocked/"
         os.mkdir(data_dir)
         devices = []
@@ -114,16 +117,79 @@ class Setups:
         ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
         return ctrl
 
+    def badmouth_good_device(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
+                             n_malicious_peers=3):
+        # how many attackers does it take to block a benign device?
+        # there are 10 peers total, 0-9 of them are malicious.
+        # There is a malicious device that is attacking everyone except peer 1
+        # after 10 round, this device starts attacking everyone.
+        # there is also a benign device 11
+        data_dir = self.data_dir + str(n_malicious_peers) + "_badmouth_good_device/"
+        os.mkdir(data_dir)
+        devices = []
+        badmouthing_targets = ["1.1.1.11"]
+        n_good_peers = n_peers - n_malicious_peers
+        for peerid in range(0, n_peers):
+            port = 6660 + peerid
+            ip_address = "1.1.1." + str(peerid)
+            if peerid < n_good_peers:
+                # create a good peer
+                p = Peer(output_queue=output_process_queue,
+                         config=config,
+                         data_dir=data_dir,
+                         port=port,
+                         ip_address=ip_address,
+                         name=str(peerid) + "_peer_benign")
+            else:
+                # create a bad peer
+                p = PeerLiarTargetIsBad(output_queue=output_process_queue,
+                                        config=config,
+                                        port=port,
+                                        data_dir=data_dir,
+                                        ip_address=ip_address,
+                                        name=str(peerid) + "_peer_malicious",
+                                        target_ips=badmouthing_targets)
+
+            p.start()
+            devices.append(p)
+
+        # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
+        targets_start = [device.ip_address for device in devices]
+        targets_start.remove("1.1.1.0")
+
+        # later in the experiment, the device will attack everyone
+        targets_later = [device.ip_address for device in devices]
+
+        attack_plan = {}
+        for i in range(0, 10):
+            attack_plan[i] = targets_start
+        for i in range(10, 20):
+            attack_plan[i] = targets_later
+
+        p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(n_peers),
+                                        name=str(n_peers) + "_device_malicious",
+                                        is_good=False,
+                                        victim_list=attack_plan)
+        devices.append(p)
+
+        p = Device(ip_address="1.1.1." + str(n_peers + 1), name=str(n_peers + 1) + "_device_benign")
+        devices.append(p)
+
+        k = 3
+
+        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
+        return ctrl
+
 
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     timestamp = str(time.time())
 
-    for n_malicious_peers in range(0, 10):
+    for n_malicious_peers in range(1, 10):
         config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
         s = Setups(base_dir)
         print("Starting experiment", n_malicious_peers)
-        ctrl = s.keep_malicious_device_unblocked(queue, config, n_malicious_peers=n_malicious_peers, n_peers=10)
+        ctrl = s.badmouth_good_device(queue, config, n_malicious_peers=n_malicious_peers, n_peers=10)
         # ctrl = s.get_test_experiment(0, queue, config)
         ctrl.run_experiment()
         queue_thread.kill()
