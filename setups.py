@@ -9,6 +9,7 @@ from p2ptrust.testing.experiments.custom_devices.device_malicious import DeviceM
 from p2ptrust.testing.experiments.custom_devices.device_malicious_attack_target import DeviceMaliciousAttackTarget
 from p2ptrust.testing.experiments.custom_devices.peer import Peer
 from p2ptrust.testing.experiments.custom_devices.peer_liar_everyone_is_good import PeerLiarEveryoneIsGood
+from p2ptrust.testing.experiments.utils import init_experiments
 from slips.core.database import __database__
 
 
@@ -108,17 +109,9 @@ class Setups:
 
 
 if __name__ == '__main__':
-    config = get_default_config()
-    output_process_queue = Queue()
-    output_process_thread = OutputProcess(output_process_queue, 1, 1, config)
-    output_process_thread.start()
+    dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
+    config, queue, base_dir = init_experiments(dirname)
 
-    # Start the DB
-    __database__.start(config)
-    __database__.setOutputQueue(output_process_queue)
-    base_dir = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-" + str(
-        time.time()) + "/"
-    os.mkdir(base_dir)
     s = Setups(base_dir)
-    ctrl = s.keep_malicious_device_unblocked(output_process_queue, config)
+    ctrl = s.keep_malicious_device_unblocked(queue, config)
     ctrl.run_experiment()

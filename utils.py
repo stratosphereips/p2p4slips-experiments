@@ -4,9 +4,15 @@ import sys
 import os
 # we need to go all the way up, because modules import slips-wide stuff
 import json
+import time
+from multiprocessing import Queue
+
+from outputProcess import OutputProcess
+from p2ptrust.testing.test_p2p import get_default_config
 
 sys.path.append(os.getcwd() + '/../../..')
 from slips.core.database import __database__
+
 
 class NetworkUpdate(enum.Enum):
     Stay = 0
@@ -37,3 +43,17 @@ def get_network_score_confidence(storage_name, ip):
     except KeyError:
         return 0, 0
     return score, confidence
+
+
+def init_experiments(base_dir):
+    config = get_default_config()
+    output_process_queue = Queue()
+    output_process_thread = OutputProcess(output_process_queue, 1, 1, config)
+    output_process_thread.start()
+
+    # Start the DB
+    __database__.start(config)
+    __database__.setOutputQueue(output_process_queue)
+    base_dir = base_dir + str(time.time()) + "/"
+    os.mkdir(base_dir)
+    return config, output_process_queue, base_dir
