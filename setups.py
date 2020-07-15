@@ -5,6 +5,7 @@ from multiprocessing import Queue
 
 from outputProcess import OutputProcess
 from p2ptrust.testing.experiments.controller import Controller
+from p2ptrust.testing.experiments.custom_devices.device import Device
 from p2ptrust.testing.experiments.custom_devices.device_malicious import DeviceMalicious
 from p2ptrust.testing.experiments.custom_devices.device_malicious_attack_target import DeviceMaliciousAttackTarget
 from p2ptrust.testing.experiments.custom_devices.peer import Peer
@@ -104,17 +105,22 @@ class Setups:
                                         is_good=False,
                                         victim_list=attack_plan)
         devices.append(p)
+
+        p = Device(ip_address="1.1.1." + str(n_peers + 1), name=str(n_peers + 1) + "_device_benign")
+        devices.append(p)
+
         k = 3
 
-        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10"], data_dir)
+        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
         return ctrl
 
 
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
+    timestamp = str(time.time())
 
     for n_malicious_peers in range(0, 10):
-        config, queue, queue_thread, base_dir = init_experiments(dirname)
+        config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
         s = Setups(base_dir)
         print("Starting experiment", n_malicious_peers)
         ctrl = s.keep_malicious_device_unblocked(queue, config, n_malicious_peers=n_malicious_peers, n_peers=10)
@@ -122,3 +128,4 @@ if __name__ == '__main__':
         ctrl.run_experiment()
         queue_thread.kill()
         time.sleep(10)
+        # SELECT * FROM main.reports r WHERE r.reporter_peerid LIKE '%malicious';
