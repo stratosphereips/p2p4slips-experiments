@@ -2,10 +2,8 @@ import json
 
 from p2ptrust.testing.experiments.ipdb import IPDatabase
 
-threshold = -0.5
 
-
-def evaluate(observations: dict, ipdb: IPDatabase, rounds, is_good=None):
+def evaluate(observations: dict, ipdb: IPDatabase, rounds, is_good=None, threshold=-0.5):
     # TODO: this doesn't take into consideration the fact that intentions of IP addresses change.
     #  IP address is classified as good/bad by what it says in ipdb right now, not during the experiment.
 
@@ -62,13 +60,15 @@ if __name__ == '__main__':
     exp_dir = "/home/dita/p2ptrust-link/testing/experiments/experiment_data/experiments-1594815406.4306164/"
     exp_suffix = "_keep_malicious_device_unblocked"
     is_good = {"1.1.1.10": False}
+    thresholds = [x/10 for x in range(-10, 10)]
 
     for i in range(0, 10):
         # the following is correct, but overly complex, as I only ever check 1.1.1.10 :D
         # is_good = {"1.1.1." + str(10 - j): True if i < 10 - j else False for j in range(1, 11)}
         data_file = exp_dir + str(i) + exp_suffix + "/round_results.txt"
-        print("Number of malicious peers: " + str(i) + "/10")
         with open(data_file, "r") as f:
             data = json.load(f)
-            evaluate(data, None, 20, is_good)
+            for threshold in thresholds:
+                print("Number of malicious peers: " + str(i) + "/10, threshold = " + str(threshold))
+                evaluate(data, None, 20, is_good, threshold=threshold)
 
