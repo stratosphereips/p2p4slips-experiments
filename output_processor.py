@@ -101,18 +101,26 @@ def find_best_threshold_long_table(observation_results: dict):
         print("\\hline")
 
 
-def create_enormous_graph(data):
+def create_enormous_table(data):
     # expected input is data[ip1, ip2, all] = accuracy
     thresholds = list(data.keys())
     weights = list(data[thresholds[0]].keys())
     ips = ["1.1.1.10", "1.1.1.11", "all"]
     ip_names = {"1.1.1.10": "1.1.1.10", "1.1.1.11": "1.1.1.11", "all": "All"}
+    cline = "\\cline{2-" + str(len(thresholds) + 2) + "}"
+    thickhline = "\\thickhline"
 
-    print("\\thickhline")
+    # prepare table width
+    column_specs = "|c|c\"" + ("c|" * len(thresholds))
+    print(column_specs)
+
+    print(thickhline)
 
     # make header
+    header = "\multicolumn{2}{|c\"}{\\backslashbox{$w$}{$T$}} & " + "".join([str(t) + " & " for t in thresholds])[:-2] + "\\\\"
+    print(header)
 
-    print("\\thickhline")
+    print(thickhline)
 
     for w in weights:
         lines = {ip: "" for ip in ips}
@@ -125,16 +133,14 @@ def create_enormous_graph(data):
         # fill lines with data
         for t in thresholds:
             for ip in ips:
-                lines[ip] += " & " + data[t][w][ip]
+                lines[ip] += " & " + str(data[t][w][ip])
 
         # end lines and print them
         for ip in ips[:-1]:
-            lines[ip] += "\\\\"
+            lines[ip] += "\\\\" + cline
             print(lines[ip])
-            print("\\hline")
 
         # print last line with a thick separator
         ip = ips[-1]
-        lines[ip] += "\\\\"
+        lines[ip] += "\\\\" + thickhline
         print(lines[ip])
-        print("\\thickhline")

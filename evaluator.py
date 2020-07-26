@@ -1,6 +1,7 @@
 import json
 
-from p2ptrust.testing.experiments.output_processor import visualise, find_best_threshold_long_table
+from p2ptrust.testing.experiments.output_processor import visualise, find_best_threshold_long_table, \
+    create_enormous_table
 
 
 def compute_detection(nscore, nconfidence, score, confidence, weight_ips):
@@ -100,6 +101,31 @@ def eval_exp_1_ips_only():
     find_best_threshold_long_table(accuracies)
 
 
+def eval_exp_2a_no_malicious():
+    exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595614755.6837168/"
+    exp_suffix = "_keep_malicious_device_unblocked"
+    exp_id = 0
+
+    is_good = {"1.1.1.10": False, "1.1.1.11": True}
+    thresholds = [x / 10 for x in range(-10, 11)]
+    weights = [x / 10 for x in range(0, 11)]
+    accuracies = {}
+
+    data_file = exp_dir + str(exp_id) + exp_suffix + "/round_results.txt"
+    with open(data_file, "r") as f:
+        data = json.load(f)
+        for threshold in thresholds:
+            accuracies[threshold] = {}
+            for ips_weight in weights:
+                print("Experiment id: " + str(exp_id) + "/10, t = " + str(threshold) + ", w = " + str(ips_weight))
+                accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=1)
+                accuracy_processed = fptp2acc(accuracy)
+                accuracies[threshold][ips_weight] = accuracy_processed
+                k = 3
+
+    create_enormous_table(accuracies)
+
+
 def fptp2acc(data: dict):
     """ Convert TP/FP/TN/TP counts to accuracy for each IP, and also combined"""
     # expected data is data[ip1, ip2][fp, tp, fn, tn] = number of occurences
@@ -126,12 +152,12 @@ def fptp2acc(data: dict):
 
 
 if __name__ == '__main__':
-    exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1594842957.0396457/"
-    exp_suffix = "_badmouth_good_device"
-    exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1594815406.4306164_/"
-    exp_suffix = "_keep_malicious_device_unblocked"
+    # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1594842957.0396457/"
+    # exp_suffix = "_badmouth_good_device"
+    # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1594815406.4306164_/"
+    # exp_suffix = "_keep_malicious_device_unblocked"
 
-    observed_results_ = eval_exp_1_ips_only()
+    observed_results_ = eval_exp_2a_no_malicious()
 
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595605824.1189618/"
     # exp_suffix = "_attacker_targeting_different_amounts_of_peers"
