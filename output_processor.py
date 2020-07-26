@@ -5,23 +5,29 @@ matplotlib.use('Qt5Agg')
 
 
 def visualise(detection_data):
-    thresholds = sorted(list(detection_data.keys()))
+    rounds = sorted(list(detection_data.keys()))
 
-    observed_ips = list(detection_data[thresholds[0]].keys())
+    observed_ips = list(detection_data[rounds[0]].keys())
 
     colors = {"1.1.1.10": "red", "1.1.1.11": "forestgreen"}
     linewidths = {"1.1.1.10": 5, "1.1.1.11": 2}
     alphas = {"1.1.1.10": 0.8, "1.1.1.11": 1.0}
+    labels = {"1.1.1.10": "1.1.1.10", "1.1.1.11": "1.1.1.11"}
 
-    ips_raw_detections = {ip: [detection_data[t][ip][0] for t in thresholds] for ip in observed_ips}
+    ips_raw_detections = {ip: [detection_data[t][ip][0] for t in rounds] for ip in observed_ips}
+    # print(ips_raw_detections)
+    visualise_raw(ips_raw_detections, observed_ips, rounds, colors, linewidths, alphas, labels)
 
-    for ip in observed_ips:
-        matplotlib.pyplot.plot(thresholds,
+
+def visualise_raw(ips_raw_detections, ips, rounds, colors, linewidths, alphas, labels):
+
+    for ip in ips:
+        matplotlib.pyplot.plot(rounds,
                                ips_raw_detections[ip],
                                color=colors[ip],
                                linewidth=linewidths[ip],
                                alpha=alphas[ip],
-                               label=ip)
+                               label=labels[ip])
     matplotlib.pyplot.ylim(-1.05, 1.05)
     matplotlib.pyplot.xticks(list(range(0, 20)))
     matplotlib.pyplot.grid(True)

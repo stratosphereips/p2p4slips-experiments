@@ -1,7 +1,7 @@
 import json
 
 from p2ptrust.testing.experiments.output_processor import visualise, find_best_threshold_long_table, \
-    create_enormous_table
+    create_enormous_table, visualise_raw
 
 
 def compute_detection(nscore, nconfidence, score, confidence, weight_ips):
@@ -95,7 +95,7 @@ def eval_exp_1_ips_only():
         data = json.load(f)
         for threshold in thresholds:
             print("Experiment id: " + str(exp_id) + "/10, threshold = " + str(threshold))
-            accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=1)
+            accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=1, show_visualisation=True)
             accuracies[threshold] = accuracy
 
     find_best_threshold_long_table(accuracies)
@@ -118,12 +118,32 @@ def eval_exp_2a_no_malicious():
             accuracies[threshold] = {}
             for ips_weight in weights:
                 print("Experiment id: " + str(exp_id) + "/10, t = " + str(threshold) + ", w = " + str(ips_weight))
-                accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=ips_weight)
+                accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=ips_weight, show_visualisation=True)
                 accuracy_processed = fptp2acc(accuracy)
                 accuracies[threshold][ips_weight] = accuracy_processed
                 k = 3
 
     create_enormous_table(accuracies)
+
+
+def exp_2a_get_attack_curves():
+    data = {'1.1.1.10':
+                [-0.24, -0.8, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                 -1.0, -1.0, -1.0],
+            '1.1.1.11':
+                [0.03, 0.12, 0.27, 0.4, 0.5, 0.6, 0.7, 0.7999999999999999, 0.8999999999999999, 0.9999999999999999, -0.4,
+                 -0.8, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+            }
+
+    rounds = list(range(0, 20))
+    ips = ["1.1.1.10", "1.1.1.11"]
+
+    colors = {"1.1.1.10": "red", "1.1.1.11": "orange"}
+    linewidths = {"1.1.1.10": 5, "1.1.1.11": 2}
+    alphas = {"1.1.1.10": 0.8, "1.1.1.11": 1.0}
+    labels = {"1.1.1.10": "Another Peer", "1.1.1.11": "Observer"}
+
+    visualise_raw(data, ips, rounds, colors, linewidths, alphas, labels)
 
 
 def fptp2acc(data: dict):
@@ -157,7 +177,9 @@ if __name__ == '__main__':
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1594815406.4306164_/"
     # exp_suffix = "_keep_malicious_device_unblocked"
 
-    observed_results_ = eval_exp_2a_no_malicious()
+    # eval_exp_2a_no_malicious()
+    exp_2a_get_attack_curves()
+    # eval_exp_1_ips_only()
 
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595605824.1189618/"
     # exp_suffix = "_attacker_targeting_different_amounts_of_peers"
