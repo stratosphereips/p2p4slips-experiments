@@ -17,12 +17,15 @@ def evaluate_ips_only(observations: dict, rounds, is_good=None, threshold=-0.5):
 
     lines = {k: "" for k in is_good.keys()}
     observation_results = {k: {"FP": 0, "TP": 0, "FN": 0, "TN": 0} for k in is_good.keys()}
+    decisions = {}
 
     for rnd in range(0, rounds):
         try:
             rnd_data = observations[rnd]
         except KeyError:
             rnd_data = observations[str(rnd)]
+
+        decisions[rnd] = {ip: [] for ip in is_good.keys()}
 
         for observer in rnd_data.keys():
             for observed_ip in rnd_data[observer].keys():
@@ -31,6 +34,8 @@ def evaluate_ips_only(observations: dict, rounds, is_good=None, threshold=-0.5):
                 gt = is_good[observed_ip]
 
                 decision = score * confidence
+                decisions[rnd][observed_ip].append(decision)
+
                 lines[observed_ip] += " " + str(decision)
                 # print(decision)
                 if decision < threshold:
@@ -49,6 +54,7 @@ def evaluate_ips_only(observations: dict, rounds, is_good=None, threshold=-0.5):
                 observation_results[observed_ip][result] += 1
                 lines[observed_ip] += result
 
+    visualise(decisions)
 
     print(lines[observed_ips[0]])
     print(lines[observed_ips[1]])
@@ -230,6 +236,11 @@ def eval_exp_ips_only():
             accuracies[threshold] = accuracy
 
     find_best_threshold_long_table(accuracies)
+
+
+def visualise(detection_data):
+    k = 33
+    pass
 
 
 if __name__ == '__main__':
