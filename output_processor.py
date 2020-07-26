@@ -73,10 +73,7 @@ def find_best_threshold_long_table(observation_results: dict):
     observed_ips = list(observation_results[first_threshold].keys())
 
     lines = {observed_ip: str(observed_ip) + " & " for observed_ip in observed_ips}
-
     lines["all"] = "All & "
-
-    thresholds_line = "".join([str(t) + " & " for t in thresholds])
 
     top_line = "Threshold & " + "".join([ip + " & " for ip in observed_ips]) + "All \\\\"
     print(top_line)
@@ -102,3 +99,42 @@ def find_best_threshold_long_table(observation_results: dict):
         t_line += str(accuracy) + " \\\\"
         print(t_line)
         print("\\hline")
+
+
+def create_enormous_graph(data):
+    # expected input is data[ip1, ip2, all] = accuracy
+    thresholds = list(data.keys())
+    weights = list(data[thresholds[0]].keys())
+    ips = ["1.1.1.10", "1.1.1.11", "all"]
+    ip_names = {"1.1.1.10": "1.1.1.10", "1.1.1.11": "1.1.1.11", "all": "All"}
+
+    print("\\thickhline")
+
+    # make header
+
+    print("\\thickhline")
+
+    for w in weights:
+        lines = {ip: "" for ip in ips}
+
+        # initialize multiline headers
+        lines[ips[0]] += "\multirow{3}{*}{" + str(w) + "} & " + ip_names[ips[0]]
+        for ip in ips[1:]:
+            lines[ip] += " & " + ip_names[ip]
+
+        # fill lines with data
+        for t in thresholds:
+            for ip in ips:
+                lines[ip] += " & " + data[t][w][ip]
+
+        # end lines and print them
+        for ip in ips[:-1]:
+            lines[ip] += "\\\\"
+            print(lines[ip])
+            print("\\hline")
+
+        # print last line with a thick separator
+        ip = ips[-1]
+        lines[ip] += "\\\\"
+        print(lines[ip])
+        print("\\thickhline")
