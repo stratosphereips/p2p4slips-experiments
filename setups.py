@@ -117,6 +117,52 @@ class Setups:
         ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
         return ctrl
 
+
+    def attacker_targeting_different_amounts_of_peers(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
+                                                      n_victim_peers=3):
+        data_dir = self.data_dir + str(n_victim_peers) + "_attacker_targeting_different_amounts_of_peers/"
+        os.mkdir(data_dir)
+        devices = []
+        for peerid in range(0, n_peers):
+            port = 6660 + peerid
+            ip_address = "1.1.1." + str(peerid)
+            # create a good peer
+            p = Peer(output_queue=output_process_queue,
+                     config=config,
+                     data_dir=data_dir,
+                     port=port,
+                     ip_address=ip_address,
+                     name=str(peerid) + "_peer_benign")
+
+            p.start()
+            devices.append(p)
+
+        # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
+        targets_start = [device.ip_address for device in devices if device.port - 6660 >= n_peers - n_victim_peers]
+        print(targets_start)
+
+        targets_later = targets_start + ["1.1.1.0"]
+
+        attack_plan = {}
+        for i in range(0, 10):
+            attack_plan[i] = targets_start
+        for i in range(10, 20):
+            attack_plan[i] = targets_later
+
+        p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(n_peers),
+                                        name=str(n_peers) + "_device_malicious",
+                                        is_good=False,
+                                        victim_list=attack_plan)
+        devices.append(p)
+
+        p = Device(ip_address="1.1.1." + str(n_peers + 1), name=str(n_peers + 1) + "_device_benign")
+        devices.append(p)
+
+        k = 3
+
+        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
+        return ctrl
+
     def badmouth_good_device(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
                              n_malicious_peers=3):
         # how many attackers does it take to block a benign device?
@@ -181,17 +227,41 @@ class Setups:
         return ctrl
 
 
+def run_atdaop(n_peers=10):
+    for i in range(1, n_peers):
+        config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+        s = Setups(base_dir)
+        ctrl = s.attacker_targeting_different_amounts_of_peers(queue, config, n_peers, i)
+        ctrl.run_experiment()
+        queue_thread.kill()
+        time.sleep(10)
+
+
+def run_kmdu(n_peers=10):
+    for i in range(0, n_peers):
+        config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+        s = Setups(base_dir)
+        ctrl = s.keep_malicious_device_unblocked(queue, config, n_peers, i)
+        ctrl.run_experiment()
+        queue_thread.kill()
+        time.sleep(10)
+
+
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     timestamp = str(time.time())
 
-    for n_malicious_peers in range(1, 10):
-        config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
-        s = Setups(base_dir)
-        print("Starting experiment", n_malicious_peers)
-        ctrl = s.badmouth_good_device(queue, config, n_malicious_peers=n_malicious_peers, n_peers=10)
-        # ctrl = s.get_test_experiment(0, queue, config)
-        ctrl.run_experiment()
-        queue_thread.kill()
-        time.sleep(10)
-        # SELECT * FROM main.reports r WHERE r.reporter_peerid LIKE '%malicious';
+    run_kmdu(10)
+
+    # for n_malicious_peers in range(1, 10):
+    #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+    #     s = Setups(base_dir)
+    #     print("Starting experiment", n_malicious_peers)
+    #     ctrl = s.badmouth_good_device(queue, config, n_malicious_peers=n_malicious_peers, n_peers=10)
+    #     # ctrl = s.get_test_experiment(0, queue, config)
+    #     ctrl.run_experiment()
+    #     queue_thread.kill()
+    #     time.sleep(10)
+    #     # SELECT * FROM main.reports r WHERE r.reporter_peerid LIKE '%malicious';
+
+
