@@ -1,7 +1,7 @@
 import json
-import matplotlib
 
-matplotlib.use('Qt5Agg')
+from p2ptrust.testing.experiments.output_processor import visualise, find_best_threshold_long_table
+
 
 def compute_detection(nscore, nconfidence, score, confidence, weight_ips):
     detection = ((1 - weight_ips) * (nscore * nconfidence)) + (weight_ips * (score * confidence))
@@ -80,87 +80,7 @@ def eval_one_exp(exp_dir, exp_id, exp_suffix, is_good):
         find_best_threshold_long_table(accuracies)
 
 
-def find_best_threshold_wide_table(observation_results: dict):
-    thresholds = sorted(list(observation_results.keys()))
-    first_threshold = thresholds[0]
-    observed_ips = list(observation_results[first_threshold].keys())
-
-    lines = {observed_ip: str(observed_ip) + " & " for observed_ip in observed_ips}
-
-    lines["all"] = "All & "
-
-    thresholds_line = "".join([str(t) + " & " for t in thresholds])
-
-
-    for threshold in thresholds:
-        success_t = 0
-        total_t = 0
-        for observed_ip in observed_ips:
-            x = observation_results[threshold][observed_ip]  # alias
-            success_i = x["TP"] + x["TN"]
-            total_i = x["TP"] + x["TN"] + x["FP"] + x["FN"]
-            success_t += success_i
-            total_t += total_i
-            accuracy = success_i/total_i
-            lines[observed_ip] += str(accuracy) + " & "
-
-        accuracy = success_t / total_t
-        lines["all"] += str(accuracy) + " & "
-
-    print("Thresholds" + thresholds_line[:-2] + "\\\\")
-    print("\\hline")
-    for ip in lines.keys():
-        print(lines[ip][:-2] + "\\\\")
-        print("\\hline")
-
-
-def find_best_threshold_long_table(observation_results: dict):
-    thresholds = sorted(list(observation_results.keys()))
-    first_threshold = thresholds[0]
-    observed_ips = list(observation_results[first_threshold].keys())
-
-    lines = {observed_ip: str(observed_ip) + " & " for observed_ip in observed_ips}
-
-    lines["all"] = "All & "
-
-    thresholds_line = "".join([str(t) + " & " for t in thresholds])
-
-    top_line = "Threshold & " + "".join([ip + " & " for ip in observed_ips]) + "All \\\\"
-    print(top_line)
-    print("\\hline")
-    print("\\hline")
-
-    for threshold in thresholds:
-        success_t = 0
-        total_t = 0
-
-        t_line = ""
-        t_line += str(threshold) + " & "
-        for observed_ip in observed_ips:
-            x = observation_results[threshold][observed_ip]  # alias
-            success_i = x["TP"] + x["TN"]
-            total_i = x["TP"] + x["TN"] + x["FP"] + x["FN"]
-            success_t += success_i
-            total_t += total_i
-            accuracy = success_i/total_i
-            t_line += str(accuracy) + " & "
-
-        accuracy = success_t / total_t
-        t_line += str(accuracy) + " \\\\"
-        print(t_line)
-        print("\\hline")
-
-
-    #
-    # print("Threshold & Accuracy \\\\")
-    # print("\\hline")
-    # for t in observation_results.keys():
-    #     print("\\hline")
-    #     print(str(t) + " & " + str(observation_results[t]) + " \\\\")
-    # print("\\hline")
-
-
-def eval_exp_ips_only():
+def eval_exp_1_ips_only():
     exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595614755.6837168/"
     exp_suffix = "_keep_malicious_device_unblocked"
     exp_id = 0
@@ -180,32 +100,29 @@ def eval_exp_ips_only():
     find_best_threshold_long_table(accuracies)
 
 
-def visualise(detection_data):
-    thresholds = sorted(list(detection_data.keys()))
+def fptp2acc(data: dict):
+    """ Convert TP/FP/TN/TP counts to accuracy for each IP, and also combined"""
+    # expected data is data[ip1, ip2][fp, tp, fn, tn] = number of occurences
+    # expected output is output[ip1, ip2, all] = accuracy
 
-    observed_ips = list(detection_data[thresholds[0]].keys())
+    output = {}
+    success_t = 0
+    total_t = 0
 
-    colors = {"1.1.1.10": "red", "1.1.1.11": "forestgreen"}
-    linewidths = {"1.1.1.10": 5, "1.1.1.11": 2}
-    alphas = {"1.1.1.10": 0.8, "1.1.1.11": 1.0}
+    for ip, ip_data in data.items():
+        success_i = ip_data["TP"] + ip_data["TN"]
+        total_i = ip_data["TP"] + ip_data["TN"] + ip_data["FP"] + ip_data["FN"]
+        success_t += success_i
+        total_t += total_i
+        accuracy = success_i / total_i
+        output[ip] = accuracy
 
-    ips_raw_detections = {ip: [detection_data[t][ip][0] for t in thresholds] for ip in observed_ips}
+    accuracy = success_t / total_t
+    output["all"] = accuracy
 
-    for ip in observed_ips:
-        matplotlib.pyplot.plot(thresholds,
-                               ips_raw_detections[ip],
-                               color=colors[ip],
-                               linewidth=linewidths[ip],
-                               alpha=alphas[ip],
-                               label=ip)
-    matplotlib.pyplot.ylim(-1.05, 1.05)
-    matplotlib.pyplot.xticks(list(range(0, 20)))
-    matplotlib.pyplot.grid(True)
-    matplotlib.pyplot.gca().set_aspect(4.5)
-    matplotlib.pyplot.xlabel('Algorithm rounds')
-    matplotlib.pyplot.ylabel('IPS detection')
-    matplotlib.pyplot.legend()
-    matplotlib.pyplot.show()
+    return output
+
+
 
 
 if __name__ == '__main__':
@@ -214,7 +131,7 @@ if __name__ == '__main__':
     exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1594815406.4306164_/"
     exp_suffix = "_keep_malicious_device_unblocked"
 
-    observed_results_ = eval_exp_ips_only()
+    observed_results_ = eval_exp_1_ips_only()
 
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595605824.1189618/"
     # exp_suffix = "_attacker_targeting_different_amounts_of_peers"
