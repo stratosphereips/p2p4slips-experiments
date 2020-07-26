@@ -118,7 +118,7 @@ def eval_exp_2a_no_malicious():
             accuracies[threshold] = {}
             for ips_weight in weights:
                 print("Experiment id: " + str(exp_id) + "/10, t = " + str(threshold) + ", w = " + str(ips_weight))
-                accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=1)
+                accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=ips_weight)
                 accuracy_processed = fptp2acc(accuracy)
                 accuracies[threshold][ips_weight] = accuracy_processed
                 k = 3

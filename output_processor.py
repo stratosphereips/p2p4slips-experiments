@@ -117,7 +117,7 @@ def create_enormous_table(data):
     print(thickhline)
 
     # make header
-    header = "\multicolumn{2}{|c\"}{\\backslashbox{$w$}{$T$}} & " + "".join([str(t) + " & " for t in thresholds])[:-2] + "\\\\"
+    header = "\multicolumn{2}{|c\"}{\\backslashbox[26mm]{$w$}{$T$}} & " + "".join([str(t) + " & " for t in thresholds])[:-2] + "\\\\"
     print(header)
 
     print(thickhline)
@@ -133,7 +133,9 @@ def create_enormous_table(data):
         # fill lines with data
         for t in thresholds:
             for ip in ips:
-                lines[ip] += " & " + str(data[t][w][ip])
+                set_color = ip == "all"
+                cell_color = get_cell_color(data[t][w][ip], set_color)
+                lines[ip] += " & " + cell_color + " " + str(data[t][w][ip])
 
         # end lines and print them
         for ip in ips[:-1]:
@@ -144,3 +146,17 @@ def create_enormous_table(data):
         ip = ips[-1]
         lines[ip] += "\\\\" + thickhline
         print(lines[ip])
+
+
+def get_cell_color(value, check=False):
+    if not check or value <= 0.75:
+        return ""
+    if value <= 0.8:
+        return "\\cellcolor{grayscale-d}"
+    if value <= 0.85:
+        return "\\cellcolor{grayscale-c}"
+    if value <= 0.9:
+        return "\\cellcolor{grayscale-b}"
+    if value <= 0.95:
+        return "\\cellcolor{grayscale-a}"
+    return "\\cellcolor{grayscale-9}"
