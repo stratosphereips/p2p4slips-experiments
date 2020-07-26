@@ -72,18 +72,25 @@ class Controller:
 
         # wait so channels don't start sending data too early
         time.sleep(1)
-        for device in self.devices:
-            if device.is_peer:
-                publish_str_to_channel("ip_info_change" + str(device.port), "stop_process")
-        time.sleep(1)
+        # for device in self.devices:
+        #     if device.is_peer:
+        #         publish_str_to_channel("ip_info_change" + str(device.port), "stop_process")
+        # time.sleep(1)
 
         for rnd in range(0, self.rounds):
             attacks = {}
             for device in self.devices:
                 attacks[device.ip_address] = device.choose_round_behavior(rnd, self.ipdb.ips.keys())
             self.hub.run_detections_ids_only(rnd, attacks)
+            self.hub.collect_data(rnd)
 
-        self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
+        # self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
+
+        time.sleep(1)
+        for device in self.devices:
+            if device.is_peer:
+                publish_str_to_channel("ip_info_change" + str(device.port), "stop_process")
+        self.export_experiment_data()
 
     def process_round_start(self, peer: Device, action: NetworkUpdate, params: str):
         if action == NetworkUpdate.Stay:

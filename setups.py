@@ -227,6 +227,42 @@ class Setups:
         return ctrl
 
 
+    def attack_observer_no_peers(self, output_process_queue, config: configparser.ConfigParser):
+        # how many attackers does it take to keep communicating with a malicious device?
+        # there are 10 peers total, 0-9 of them are malicious.
+        # There is a malicious device that is attacking everyone except peer 1
+        # after 10 round, this device starts attacking everyone.
+        # there is also a benign device 11
+        data_dir = self.data_dir + "0_keep_malicious_device_unblocked/"
+        os.mkdir(data_dir)
+        devices = []
+        p = Peer(output_queue=output_process_queue,
+                 config=config,
+                 data_dir=data_dir,
+                 port=6660,
+                 ip_address="1.1.1.0",
+                 name="0_peer_benign")
+        p.start()
+        devices.append(p)
+
+        targets = ["1.1.1.0"]
+
+        attack_plan = {}
+        for i in range(0, 20):
+            attack_plan[i] = targets
+
+        p = DeviceMaliciousAttackTarget(ip_address="1.1.1.10",
+                                        name="10_device_malicious",
+                                        is_good=False,
+                                        victim_list=attack_plan)
+        devices.append(p)
+
+        p = Device(ip_address="1.1.1.11", name="11_device_benign")
+        devices.append(p)
+        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
+        return ctrl
+
+
 def run_atdaop(n_peers=10):
     for i in range(1, n_peers):
         config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
@@ -242,17 +278,25 @@ def run_kmdu(n_peers=10):
         config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
         s = Setups(base_dir)
         ctrl = s.keep_malicious_device_unblocked(queue, config, n_peers, i)
-        # ctrl.run_experiment()
-        ctrl.run_experiment_ids_only()
+        ctrl.run_experiment()
         queue_thread.kill()
         time.sleep(10)
+
+
+def run_attack_observer():
+    config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+    s = Setups(base_dir)
+    ctrl = s.attack_observer_no_peers(queue, config)
+    ctrl.run_experiment_ids_only()
+    queue_thread.kill()
+    time.sleep(10)
 
 
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     timestamp = str(time.time())
 
-    run_kmdu(10)
+    run_attack_observer()
 
     # for n_malicious_peers in range(1, 10):
     #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
