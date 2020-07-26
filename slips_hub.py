@@ -41,7 +41,10 @@ class SlipsHub():
             self.process_interactions(peer, interactions)
 
     def process_interactions(self, peer_ip: str, interactions: dict):
-        port = self.ipdb.ips[peer_ip].port
+        device = self.ipdb.ips[peer_ip]
+        if not device.is_peer:
+            return
+        port = device.port
         storage_name = "IPsInfo" + str(port)
 
         for attacker_ip_address, interaction in interactions.items():

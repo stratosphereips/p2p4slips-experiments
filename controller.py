@@ -72,14 +72,15 @@ class Controller:
 
         # wait so channels don't start sending data too early
         time.sleep(1)
-        for peer in self.devices:
-            publish_str_to_channel("ip_info_change" + str(peer.port), "stop_process")
+        for device in self.devices:
+            if device.is_peer:
+                publish_str_to_channel("ip_info_change" + str(device.port), "stop_process")
         time.sleep(1)
 
         for rnd in range(0, self.rounds):
             attacks = {}
-            for peer in self.devices:
-                attacks[peer.ipaddress] = peer.make_choice(rnd, self.ipdb.ips.keys())
+            for device in self.devices:
+                attacks[device.ip_address] = device.choose_round_behavior(rnd, self.ipdb.ips.keys())
             self.hub.run_detections_ids_only(rnd, attacks)
 
         self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])

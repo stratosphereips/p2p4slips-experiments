@@ -242,7 +242,8 @@ def run_kmdu(n_peers=10):
         config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
         s = Setups(base_dir)
         ctrl = s.keep_malicious_device_unblocked(queue, config, n_peers, i)
-        ctrl.run_experiment()
+        # ctrl.run_experiment()
+        ctrl.run_experiment_ids_only()
         queue_thread.kill()
         time.sleep(10)
 
