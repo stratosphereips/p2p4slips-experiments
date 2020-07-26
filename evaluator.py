@@ -1,18 +1,18 @@
 import json
+import matplotlib
 
-from p2ptrust.testing.experiments.ipdb import IPDatabase
+matplotlib.use('Qt5Agg')
+
+def compute_detection(nscore, nconfidence, score, confidence, weight_ips):
+    detection = ((1 - weight_ips) * (nscore * nconfidence)) + (weight_ips * (score * confidence))
+    return detection
 
 
-def evaluate_ips_only(observations: dict, rounds, is_good=None, threshold=-0.5):
+def evaluate(observations: dict, rounds, is_good=None, threshold=-0.5, weight_ips=0.5, show_visualisation=False):
 
     if is_good is None:
         is_good = {}
-    # print(observations)
 
-    tp = 0  # correctly identified attackers
-    tn = 0  # correctly identified benign ips
-    fp = 0  # falsely accused benign ips
-    fn = 0  # undetected attackers
     observed_ips = list(is_good.keys())
 
     lines = {k: "" for k in is_good.keys()}
@@ -29,11 +29,10 @@ def evaluate_ips_only(observations: dict, rounds, is_good=None, threshold=-0.5):
 
         for observer in rnd_data.keys():
             for observed_ip in rnd_data[observer].keys():
-                nscore, nconfidence, score, confidence = rnd_data[observer][observed_ip]
-                # print(nscore, nconfidence, score, confidence)
+                net_score, net_confidence, score, confidence = rnd_data[observer][observed_ip]
                 gt = is_good[observed_ip]
 
-                decision = score * confidence
+                decision = compute_detection(net_score, net_confidence, score, confidence, weight_ips)
                 decisions[rnd][observed_ip].append(decision)
 
                 lines[observed_ip] += " " + str(decision)
@@ -54,70 +53,13 @@ def evaluate_ips_only(observations: dict, rounds, is_good=None, threshold=-0.5):
                 observation_results[observed_ip][result] += 1
                 lines[observed_ip] += result
 
-    visualise(decisions)
+    if show_visualisation:
+        visualise(decisions)
 
     print(lines[observed_ips[0]])
     print(lines[observed_ips[1]])
 
     return observation_results
-
-
-def evaluate(observations: dict, ipdb: IPDatabase, rounds, is_good=None, threshold=-0.5):
-    # TODO: this doesn't take into consideration the fact that intentions of IP addresses change.
-    #  IP address is classified as good/bad by what it says in ipdb right now, not during the experiment.
-
-    if is_good is None:
-        is_good = {}
-    # print(observations)
-
-    tp = 0  # correctly identified attackers
-    tn = 0  # correctly identified benign ips
-    fp = 0  # falsely accused benign ips
-    fn = 0  # undetected attackers
-
-    if ipdb is not None:
-        is_good = {ip_address: ipdb.ips[ip_address].is_good for ip_address in ipdb.ips.keys()}
-
-    line = ""
-    for rnd in range(0, rounds):
-        try:
-            rnd_data = observations[rnd]
-        except KeyError:
-            rnd_data = observations[str(rnd)]
-
-        if rnd < 10:
-            # TODO fix
-            continue
-
-        for observer in rnd_data.keys():
-            for observed_ip in rnd_data[observer].keys():
-                nscore, nconfidence, score, confidence = rnd_data[observer][observed_ip]
-                # print(nscore, nconfidence, score, confidence)
-                gt = is_good[observed_ip]
-
-                decision = ((score * confidence) + (nscore * nconfidence)) / 2
-                line += str(decision) + " "
-                # print(decision)
-                if decision < threshold:
-                    # we say it is an attacker
-                    if gt:
-                        fp += 1  # we are wrong
-                    else:
-                        tp += 1  # we are right
-                else:
-                    # we say he is benign
-                    if gt:
-                        tn += 1  # we are right
-                    else:
-                        fn += 1  # we are wrong
-    print(line)
-
-    print("STATS: ", tp, tn, fp, fn)
-    success = tp + tn
-    all = tp + tn + fp + fn
-    accuracy = success / all
-    print("ACCURACY: ", accuracy)
-    return accuracy
 
 
 def eval_one_exp(exp_dir, exp_id, exp_suffix, is_good):
@@ -132,7 +74,7 @@ def eval_one_exp(exp_dir, exp_id, exp_suffix, is_good):
             data = json.load(f)
             for threshold in thresholds:
                 print("Experiment id: " + str(exp_id) + "/10, threshold = " + str(threshold))
-                accuracy = evaluate_ips_only(data, 20, is_good, threshold=threshold)
+                accuracy = evaluate(data, 20, is_good, threshold=threshold)
                 accuracies[threshold].append(accuracy)
 
         find_best_threshold_long_table(accuracies)
@@ -232,15 +174,38 @@ def eval_exp_ips_only():
         data = json.load(f)
         for threshold in thresholds:
             print("Experiment id: " + str(exp_id) + "/10, threshold = " + str(threshold))
-            accuracy = evaluate_ips_only(data, 20, is_good, threshold=threshold)
+            accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=1)
             accuracies[threshold] = accuracy
 
     find_best_threshold_long_table(accuracies)
 
 
 def visualise(detection_data):
-    k = 33
-    pass
+    thresholds = sorted(list(detection_data.keys()))
+
+    observed_ips = list(detection_data[thresholds[0]].keys())
+
+    colors = {"1.1.1.10": "red", "1.1.1.11": "forestgreen"}
+    linewidths = {"1.1.1.10": 5, "1.1.1.11": 2}
+    alphas = {"1.1.1.10": 0.8, "1.1.1.11": 1.0}
+
+    ips_raw_detections = {ip: [detection_data[t][ip][0] for t in thresholds] for ip in observed_ips}
+
+    for ip in observed_ips:
+        matplotlib.pyplot.plot(thresholds,
+                               ips_raw_detections[ip],
+                               color=colors[ip],
+                               linewidth=linewidths[ip],
+                               alpha=alphas[ip],
+                               label=ip)
+    matplotlib.pyplot.ylim(-1.05, 1.05)
+    matplotlib.pyplot.xticks(list(range(0, 20)))
+    matplotlib.pyplot.grid(True)
+    matplotlib.pyplot.gca().set_aspect(4.5)
+    matplotlib.pyplot.xlabel('Algorithm rounds')
+    matplotlib.pyplot.ylabel('IPS detection')
+    matplotlib.pyplot.legend()
+    matplotlib.pyplot.show()
 
 
 if __name__ == '__main__':
