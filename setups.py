@@ -51,7 +51,7 @@ def get_staggered_attack_plan(n_rounds, n_peers):
         attack_plan[rnd] = targets
 
     # the observer is attacked in the second half of the experiment
-    for rnd in range(int(round(n_rounds/2)), n_rounds):
+    for rnd in range(int(round(n_rounds / 2)), n_rounds):
         attack_plan[rnd].append("1.1.1.0")
 
     return attack_plan
@@ -61,7 +61,8 @@ class Setups:
     def __init__(self, data_dir):
         self.setups = [self.run_test_experiments]
         self.data_dir = data_dir
-        self.initialise_bad_peers = {"PeerLiarEveryoneIsGood": self.initialise_liar_everyone_is_good}
+        self.initialise_bad_peers = {"PeerLiarEveryoneIsGood": self.initialise_liar_everyone_is_good,
+                                     "PeerBadmouthTarget": self.initialise_malicious_peer_badmouth_target}
 
     def initialise_good_peer(self,
                              queue,
@@ -95,6 +96,28 @@ class Setups:
                                    data_dir=data_dir,
                                    ip_address=ip_base + str(peer_id),
                                    name=str(peer_id) + name_suffix)
+        p.start()
+        return p
+
+    def initialise_malicious_peer_badmouth_target(self,
+                                                  queue,
+                                                  config,
+                                                  data_dir,
+                                                  peer_id,
+                                                  params=None,
+                                                  port_base=6660,
+                                                  ip_base="1.1.1.",
+                                                  name_suffix="_peer_barmouth_target"):
+        if params is None:
+            params = []
+
+        p = PeerLiarTargetIsBad(output_queue=queue,
+                                config=config,
+                                port=port_base + peer_id,
+                                data_dir=data_dir,
+                                ip_address=ip_base + str(peer_id),
+                                name=str(peer_id) + name_suffix,
+                                target_ips=params)
         p.start()
         return p
 
@@ -192,66 +215,27 @@ class Setups:
             ctrl.run_experiment()
             time.sleep(5)
 
-    def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
-                                        n_malicious_peers=3):
-        # how many attackers does it take to keep communicating with a malicious device?
-        # there are 10 peers total, 0-9 of them are malicious.
-        # There is a malicious device that is attacking everyone except peer 1
-        # after 10 round, this device starts attacking everyone.
-        # there is also a benign device 11
-        data_dir = self.data_dir + str(n_malicious_peers) + "_keep_malicious_device_unblocked/"
-        os.mkdir(data_dir)
-        devices = []
-        n_good_peers = n_peers - n_malicious_peers
-        for peerid in range(0, n_peers):
-            port = 6660 + peerid
-            ip_address = "1.1.1." + str(peerid)
-            if peerid < n_good_peers:
-                # create a good peer
-                p = Peer(output_queue=output_process_queue,
-                         config=config,
-                         data_dir=data_dir,
-                         port=port,
-                         ip_address=ip_address,
-                         name=str(peerid) + "_peer_benign")
-            else:
-                # create a bad peer
-                p = PeerLiarEveryoneIsGood(output_queue=output_process_queue,
-                                           config=config,
-                                           port=port,
-                                           data_dir=data_dir,
-                                           ip_address=ip_address,
-                                           name=str(peerid) + "_peer_malicious")
+    def run_4(self, dir_prefix):
+        # badmouthing
 
-            p.start()
-            devices.append(p)
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_4a")
 
-        # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
-        targets_start = [device.ip_address for device in devices]
-        targets_start.remove("1.1.1.0")
+        # prepare attack plan for the malicious device
+        attack_plan = get_two_part_attack_plan(n_rounds=20, n_peers=10)
+        badmouthing_targets = ["1.1.1.11"]
 
-        # later in the experiment, the device will attack everyone
-        targets_later = [device.ip_address for device in devices]
-
-        attack_plan = {}
-        for i in range(0, 10):
-            attack_plan[i] = targets_start
-        for i in range(10, 20):
-            attack_plan[i] = targets_later
-
-        p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(n_peers),
-                                        name=str(n_peers) + "_device_malicious",
-                                        is_good=False,
-                                        victim_list=attack_plan)
-        devices.append(p)
-
-        p = Device(ip_address="1.1.1." + str(n_peers + 1), name=str(n_peers + 1) + "_device_benign")
-        devices.append(p)
-
-        k = 3
-
-        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
-        return ctrl
+        for n_good_peers in range(1, 10):
+            ctrl = self.attack_parametrised(base_dir,
+                                            exp_id=n_good_peers,
+                                            n_good_peers=n_good_peers,
+                                            n_peers=10,
+                                            n_rounds=20,
+                                            attack_plan=attack_plan,
+                                            bad_peer_type="PeerBadmouthTarget",
+                                            bad_peer_params=badmouthing_targets,
+                                            experiment_suffix="")
+            ctrl.run_experiment()
+            time.sleep(5)
 
     def attacker_targeting_different_amounts_of_peers(self, output_process_queue, config: configparser.ConfigParser,
                                                       n_peers=10,
@@ -278,69 +262,6 @@ class Setups:
         print(targets_start)
 
         targets_later = targets_start + ["1.1.1.0"]
-
-        attack_plan = {}
-        for i in range(0, 10):
-            attack_plan[i] = targets_start
-        for i in range(10, 20):
-            attack_plan[i] = targets_later
-
-        p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(n_peers),
-                                        name=str(n_peers) + "_device_malicious",
-                                        is_good=False,
-                                        victim_list=attack_plan)
-        devices.append(p)
-
-        p = Device(ip_address="1.1.1." + str(n_peers + 1), name=str(n_peers + 1) + "_device_benign")
-        devices.append(p)
-
-        k = 3
-
-        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
-        return ctrl
-
-    def badmouth_good_device(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
-                             n_malicious_peers=3):
-        # how many attackers does it take to block a benign device?
-        # there are 10 peers total, 0-9 of them are malicious.
-        # There is a malicious device that is attacking everyone except peer 1
-        # after 10 round, this device starts attacking everyone.
-        # there is also a benign device 11
-        data_dir = self.data_dir + str(n_malicious_peers) + "_badmouth_good_device/"
-        os.mkdir(data_dir)
-        devices = []
-        badmouthing_targets = ["1.1.1.11"]
-        n_good_peers = n_peers - n_malicious_peers
-        for peerid in range(0, n_peers):
-            port = 6660 + peerid
-            ip_address = "1.1.1." + str(peerid)
-            if peerid < n_good_peers:
-                # create a good peer
-                p = Peer(output_queue=output_process_queue,
-                         config=config,
-                         data_dir=data_dir,
-                         port=port,
-                         ip_address=ip_address,
-                         name=str(peerid) + "_peer_benign")
-            else:
-                # create a bad peer
-                p = PeerLiarTargetIsBad(output_queue=output_process_queue,
-                                        config=config,
-                                        port=port,
-                                        data_dir=data_dir,
-                                        ip_address=ip_address,
-                                        name=str(peerid) + "_peer_malicious",
-                                        target_ips=badmouthing_targets)
-
-            p.start()
-            devices.append(p)
-
-        # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
-        targets_start = [device.ip_address for device in devices]
-        targets_start.remove("1.1.1.0")
-
-        # later in the experiment, the device will attack everyone
-        targets_later = [device.ip_address for device in devices]
 
         attack_plan = {}
         for i in range(0, 10):
@@ -554,7 +475,8 @@ if __name__ == '__main__':
     s = Setups("")
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
-    s.run_3(dirname)
+    # s.run_3(dirname)
+    s.run_4(dirname)
 
     # run_ips_sim_for_2b()
 

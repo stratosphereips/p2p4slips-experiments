@@ -62,7 +62,7 @@ class Controller:
 
         is_good = {device.ip_address: device.is_good for device in self.ipdb.devices}
         evaluate(self.hub.observations, self.rounds, is_good)
-        self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
+        # self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
 
         time.sleep(1)
         self.stop()
