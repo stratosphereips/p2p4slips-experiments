@@ -114,20 +114,33 @@ class Setups:
 
     def run_2b(self, dir_prefix):
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_2b")
-        timestamp = str(time.time()) + "_exp2b"
-        for peer_id in range(1, 10):
-            config, queue, queue_thread, base_dir = init_experiment(base_dir)
-            s = Setups(base_dir)
-            attack_plan = {}
-            for i in range(0, 20):
-                targets = []
-                if abs(peer_id - i) <= 1:
-                    targets.append("1.1.1.0")
-                attack_plan[i] = targets
-            ctrl = s.attack_observer_no_peers(queue, config, exp_id=peer_id, attack_plan=attack_plan)
-            ctrl.run_experiment_ids_only()
-            queue_thread.kill()
-            time.sleep(10)
+
+        # prepare attack plan for the malicious device
+        attack_plan = {}
+
+        # the attack plan has a separate layout for each round
+        for round in range(0, 11):
+            targets = []
+            for peer_id in range(1, 10):
+                # a peer will be attacked if it's id is close to the round
+                if abs(peer_id - round) <= 1:
+                    targets.append("1.1.1." + str(peer_id))
+            attack_plan[round] = targets
+
+        # the observer is attacked in the second half of the experiment
+        for round in range(11, 20):
+            attack_plan[round] = ["1.1.1.0"]
+
+        exp_id = 0
+
+        ctrl = self.attack_parametrised(base_dir,
+                                        exp_id=exp_id,
+                                        n_good_peers=10,
+                                        n_peers=10,
+                                        n_rounds=20,
+                                        attack_plan=attack_plan,
+                                        experiment_suffix="")
+        ctrl.run_experiment()
 
     def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
                                         n_malicious_peers=3):
@@ -489,7 +502,8 @@ def run_ips_sim_for_2b():
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     s = Setups("")
-    s.run_test_experiments(dirname)
+    # s.run_test_experiments(dirname)
+    s.run_2b(dirname)
 
     # run_ips_sim_for_2b()
 
