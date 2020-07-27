@@ -41,11 +41,11 @@ class Setups:
                              ip_base="1.1.1.",
                              name_suffix="_good_peer"):
         p = Peer(output_queue=queue,
-                  config=config,
-                  data_dir=data_dir,
-                  port=port_base + peer_id,
-                  ip_address=ip_base + str(peer_id),
-                  name=str(peer_id) + name_suffix)
+                 config=config,
+                 data_dir=data_dir,
+                 port=port_base + peer_id,
+                 ip_address=ip_base + str(peer_id),
+                 name=str(peer_id) + name_suffix)
         p.start()
         return p
 
@@ -54,6 +54,7 @@ class Setups:
                                          config,
                                          data_dir,
                                          peer_id,
+                                         params=None,
                                          port_base=6660,
                                          ip_base="1.1.1.",
                                          name_suffix="_peer_liar_everyone_is_good"):
@@ -66,23 +67,48 @@ class Setups:
         p.start()
         return p
 
+    def initialise_malicious_device_with_target(self, attack_plan, peer_id):
+        if attack_plan is None:
+            targets = ["1.1.1.0"]
+            attack_plan = {}
+            for i in range(0, 20):
+                attack_plan[i] = targets
+
+        p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(peer_id),
+                                        name=str(peer_id) + "_device_malicious",
+                                        is_good=False,
+                                        victim_list=attack_plan)
+        return p
+
+    def initialise_malicious_device(self, peer_id):
+        p = DeviceMalicious(ip_address="1.1.1." + str(peer_id),
+                            name=str(peer_id) + "_device_malicious",
+                            is_good=False)
+        return p
+
+    def initialise_benign_device(self, peer_id):
+        p = Device(ip_address="1.1.1." + str(peer_id), name=str(peer_id) + "_device_benign")
+        return p
+
     def get_experiment(self, id, output_process_queue, config):
         return self.setups[id](id, output_process_queue, config)
 
-    def get_test_experiment(self, identifier: int, output_process_queue, config: configparser.ConfigParser):
-        data_dir = self.data_dir + str(identifier) + "/"
-        os.mkdir(data_dir)
+    def get_test_experiment(self, dir_prefix):
+        observer_ips = ["1.1.1.0"]
+        observed_ips = ["1.1.1.1"]
+        config, queue, queue_thread, base_dir = init_experiments(dir_prefix, exp_name="_test_experiment")
 
-        p0 = self.initialise_good_peer(output_process_queue, config, data_dir, 0)
-
-        # later, this device will be malicious
-        p1 = DeviceMalicious(ip_address="1.1.1.1", name="1_device_malicious", is_good=False)
-
-        p2 = self.initialise_liar_everyone_is_good(output_process_queue, config, data_dir, 2)
-
-        devices = [p0, p1, p2]
-
-        ctrl = Controller(devices, 3, ["1.1.1.0"], ["1.1.1.1"], data_dir)
+        ctrl = self.attack_parametrised(queue,
+                                        config,
+                                        base_dir,
+                                        exp_id=0,
+                                        n_good_peers=1,
+                                        n_peers=2,
+                                        n_rounds=3,
+                                        bad_peer_type="PeerLiarEveryoneIsGood",
+                                        attack_plan=None,
+                                        observer_ips=observer_ips,
+                                        observed_ips=observed_ips)
         return ctrl
 
     def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
@@ -297,17 +323,19 @@ class Setups:
     def attack_parametrised(self,
                             output_process_queue,
                             config: configparser.ConfigParser,
+                            base_dir: str,
                             exp_id=0,
                             n_good_peers=10,
                             n_peers=10,
                             n_rounds=20,
                             bad_peer_type="Something_here",
+                            bad_peer_params=None,
                             attack_plan=None,
                             experiment_suffix="/",
                             observer_ips=None,
                             observed_ips=None):
 
-        data_dir = self.data_dir + str(exp_id) + experiment_suffix
+        data_dir = base_dir + str(exp_id) + experiment_suffix
         os.mkdir(data_dir)
         devices = []
 
@@ -330,19 +358,15 @@ class Setups:
             port = 6660 + peerid
             ip_address = "1.1.1." + str(peerid)
             print(port, ip_address, bad_peer_type)
-            raise NotImplementedError
-            # p = Peer(output_queue=output_process_queue,
-            #          config=config,
-            #          data_dir=data_dir,
-            #          port=port,
-            #          ip_address=ip_address,
-            #          name=str(peerid) + "_peer_benign")
-            #
-            # p.start()
-            # devices.append(p)
+            p = self.initialise_bad_peers[bad_peer_type](queue=output_process_queue,
+                                                         config=config,
+                                                         data_dir=data_dir,
+                                                         peer_id=peerid,
+                                                         params=bad_peer_params)
+            devices.append(p)
 
-        devices.append(get_malicious_device(attack_plan, n_peers))
-        devices.append(get_benign_device(n_peers + 1))
+        devices.append(self.initialise_malicious_device_with_target(attack_plan, n_peers))
+        devices.append(self.initialise_benign_device(n_peers + 1))
 
         if observer_ips is None:
             observer_ips = ["1.1.1.0"]
@@ -352,25 +376,6 @@ class Setups:
 
         ctrl = Controller(devices, n_rounds, observer_ips, observed_ips, data_dir)
         return ctrl
-
-
-def get_malicious_device(attack_plan, peer_id):
-    if attack_plan is None:
-        targets = ["1.1.1.0"]
-        attack_plan = {}
-        for i in range(0, 20):
-            attack_plan[i] = targets
-
-    p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(peer_id),
-                                    name=str(peer_id) + "_device_malicious",
-                                    is_good=False,
-                                    victim_list=attack_plan)
-    return p
-
-
-def get_benign_device(peer_id):
-    p = Device(ip_address="1.1.1." + str(peer_id), name=str(peer_id) + "_device_benign")
-    return p
 
 
 def run_atdaop(n_peers=10):
@@ -467,9 +472,11 @@ def run_ips_sim_for_2b():
 
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
-    timestamp = str(time.time())
+    s = Setups("")
+    ctrl = s.get_test_experiment(dirname)
+    ctrl.run_experiment()
 
-    run_ips_sim_for_2b()
+    # run_ips_sim_for_2b()
 
     # for n_malicious_peers in range(1, 10):
     #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
