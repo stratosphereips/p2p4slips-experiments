@@ -2,11 +2,8 @@ import configparser
 import json
 import os
 import time
-from multiprocessing import Queue
-
 import matplotlib
 
-from outputProcess import OutputProcess
 from p2ptrust.testing.experiments.controller import Controller
 from p2ptrust.testing.experiments.custom_devices.device import Device
 from p2ptrust.testing.experiments.custom_devices.device_malicious import DeviceMalicious
@@ -17,7 +14,6 @@ from p2ptrust.testing.experiments.custom_devices.peer_liar_target_is_bad import 
 from p2ptrust.testing.experiments.evaluator import compute_detection
 from p2ptrust.testing.experiments.output_processor import visualise_raw
 from p2ptrust.testing.experiments.utils import init_experiment, prepare_experiments_dir
-from slips.core.database import __database__
 
 
 def get_default_config():
@@ -365,53 +361,6 @@ class Setups:
         return ctrl
 
 
-def run_atdaop(n_peers=10):
-    for i in range(1, n_peers):
-        config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
-        s = Setups(base_dir)
-        ctrl = s.attacker_targeting_different_amounts_of_peers(queue, config, n_peers, i)
-        ctrl.run_experiment()
-        queue_thread.kill()
-        time.sleep(10)
-
-
-def run_kmdu(n_peers=10):
-    for i in range(0, n_peers):
-        config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
-        s = Setups(base_dir)
-        ctrl = s.keep_malicious_device_unblocked(queue, config, n_peers, i)
-        ctrl.run_experiment()
-        queue_thread.kill()
-        time.sleep(10)
-
-
-def run_attack_observer():
-    config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
-    s = Setups(base_dir)
-    ctrl = s.attack_observer_no_peers(queue, config)
-    ctrl.run_experiment_ids_only()
-    queue_thread.kill()
-    time.sleep(10)
-
-
-def run_2b():
-    dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
-    timestamp = str(time.time()) + "_exp2b"
-    for peer_id in range(1, 10):
-        config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
-        s = Setups(base_dir)
-        attack_plan = {}
-        for i in range(0, 20):
-            targets = []
-            if abs(peer_id - i) <= 1:
-                targets.append("1.1.1.0")
-            attack_plan[i] = targets
-        ctrl = s.attack_observer_no_peers(queue, config, exp_id=peer_id, attack_plan=attack_plan)
-        ctrl.run_experiment_ids_only()
-        queue_thread.kill()
-        time.sleep(10)
-
-
 def run_ips_sim_for_2b():
     exp_name = "_ips_sim"
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
@@ -464,16 +413,3 @@ if __name__ == '__main__':
     # s.run_2b(dirname)
     # s.run_3(dirname)
     s.run_4(dirname)
-
-    # run_ips_sim_for_2b()
-
-    # for n_malicious_peers in range(1, 10):
-    #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
-    #     s = Setups(base_dir)
-    #     print("Starting experiment", n_malicious_peers)
-    #     ctrl = s.badmouth_good_device(queue, config, n_malicious_peers=n_malicious_peers, n_peers=10)
-    #     # ctrl = s.get_test_experiment(0, queue, config)
-    #     ctrl.run_experiment()
-    #     queue_thread.kill()
-    #     time.sleep(10)
-    #     # SELECT * FROM main.reports r WHERE r.reporter_peerid LIKE '%malicious';
