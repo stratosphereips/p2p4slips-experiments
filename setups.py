@@ -69,95 +69,95 @@ def get_attack_plan_with_given_victim_count(n_rounds, n_victims):
     return attack_plan
 
 
+def initialise_good_peer(queue,
+                         config,
+                         data_dir,
+                         peer_id,
+                         port_base=6660,
+                         ip_base="1.1.1.",
+                         name_suffix="_good_peer"):
+    p = Peer(output_queue=queue,
+             config=config,
+             data_dir=data_dir,
+             port=port_base + peer_id,
+             ip_address=ip_base + str(peer_id),
+             name=str(peer_id) + name_suffix)
+    p.start()
+    return p
+
+
+def initialise_liar_everyone_is_good(queue,
+                                     config,
+                                     data_dir,
+                                     peer_id,
+                                     params=None,
+                                     port_base=6660,
+                                     ip_base="1.1.1.",
+                                     name_suffix="_peer_liar_everyone_is_good"):
+    p = PeerLiarEveryoneIsGood(output_queue=queue,
+                               config=config,
+                               port=port_base + peer_id,
+                               data_dir=data_dir,
+                               ip_address=ip_base + str(peer_id),
+                               name=str(peer_id) + name_suffix)
+    p.start()
+    return p
+
+
+def initialise_malicious_peer_badmouth_target(queue,
+                                              config,
+                                              data_dir,
+                                              peer_id,
+                                              params=None,
+                                              port_base=6660,
+                                              ip_base="1.1.1.",
+                                              name_suffix="_peer_barmouth_target"):
+    if params is None:
+        params = []
+
+    p = PeerLiarTargetIsBad(output_queue=queue,
+                            config=config,
+                            port=port_base + peer_id,
+                            data_dir=data_dir,
+                            ip_address=ip_base + str(peer_id),
+                            name=str(peer_id) + name_suffix,
+                            target_ips=params)
+    p.start()
+    return p
+
+
+def initialise_malicious_device_with_target(attack_plan, peer_id):
+    if attack_plan is None:
+        targets = ["1.1.1.0"]
+        attack_plan = {}
+        for i in range(0, 20):
+            attack_plan[i] = targets
+
+    p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(peer_id),
+                                    name=str(peer_id) + "_device_malicious",
+                                    is_good=False,
+                                    victim_list=attack_plan)
+    return p
+
+
+def initialise_malicious_device(peer_id):
+    p = DeviceMalicious(ip_address="1.1.1." + str(peer_id),
+                        name=str(peer_id) + "_device_malicious",
+                        is_good=False)
+    return p
+
+
+def initialise_benign_device(peer_id):
+    p = Device(ip_address="1.1.1." + str(peer_id), name=str(peer_id) + "_device_benign")
+    return p
+
+
 class Setups:
     def __init__(self, data_dir):
         self.setups = [self.run_test_experiments]
         self.data_dir = data_dir
-        self.initialise_bad_peers = {"PeerLiarEveryoneIsGood": self.initialise_liar_everyone_is_good,
-                                     "PeerBadmouthTarget": self.initialise_malicious_peer_badmouth_target}
-
-    def initialise_good_peer(self,
-                             queue,
-                             config,
-                             data_dir,
-                             peer_id,
-                             port_base=6660,
-                             ip_base="1.1.1.",
-                             name_suffix="_good_peer"):
-        p = Peer(output_queue=queue,
-                 config=config,
-                 data_dir=data_dir,
-                 port=port_base + peer_id,
-                 ip_address=ip_base + str(peer_id),
-                 name=str(peer_id) + name_suffix)
-        p.start()
-        return p
-
-    def initialise_liar_everyone_is_good(self,
-                                         queue,
-                                         config,
-                                         data_dir,
-                                         peer_id,
-                                         params=None,
-                                         port_base=6660,
-                                         ip_base="1.1.1.",
-                                         name_suffix="_peer_liar_everyone_is_good"):
-        p = PeerLiarEveryoneIsGood(output_queue=queue,
-                                   config=config,
-                                   port=port_base + peer_id,
-                                   data_dir=data_dir,
-                                   ip_address=ip_base + str(peer_id),
-                                   name=str(peer_id) + name_suffix)
-        p.start()
-        return p
-
-    def initialise_malicious_peer_badmouth_target(self,
-                                                  queue,
-                                                  config,
-                                                  data_dir,
-                                                  peer_id,
-                                                  params=None,
-                                                  port_base=6660,
-                                                  ip_base="1.1.1.",
-                                                  name_suffix="_peer_barmouth_target"):
-        if params is None:
-            params = []
-
-        p = PeerLiarTargetIsBad(output_queue=queue,
-                                config=config,
-                                port=port_base + peer_id,
-                                data_dir=data_dir,
-                                ip_address=ip_base + str(peer_id),
-                                name=str(peer_id) + name_suffix,
-                                target_ips=params)
-        p.start()
-        return p
-
-    def initialise_malicious_device_with_target(self, attack_plan, peer_id):
-        if attack_plan is None:
-            targets = ["1.1.1.0"]
-            attack_plan = {}
-            for i in range(0, 20):
-                attack_plan[i] = targets
-
-        p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(peer_id),
-                                        name=str(peer_id) + "_device_malicious",
-                                        is_good=False,
-                                        victim_list=attack_plan)
-        return p
-
-    def initialise_malicious_device(self, peer_id):
-        p = DeviceMalicious(ip_address="1.1.1." + str(peer_id),
-                            name=str(peer_id) + "_device_malicious",
-                            is_good=False)
-        return p
-
-    def initialise_benign_device(self, peer_id):
-        p = Device(ip_address="1.1.1." + str(peer_id), name=str(peer_id) + "_device_benign")
-        return p
-
-    def get_experiment(self, id, output_process_queue, config):
-        return self.setups[id](id, output_process_queue, config)
+        self.initialise_bad_peers = {"PeerLiarEveryoneIsGood": initialise_liar_everyone_is_good,
+                                     "PeerBadmouthTarget": initialise_malicious_peer_badmouth_target}
 
     def run_test_experiments(self, dir_prefix):
         observer_ips = ["1.1.1.0"]
@@ -348,8 +348,8 @@ class Setups:
                                                          params=bad_peer_params)
             devices.append(p)
 
-        devices.append(self.initialise_malicious_device_with_target(attack_plan, n_peers))
-        devices.append(self.initialise_benign_device(n_peers + 1))
+        devices.append(initialise_malicious_device_with_target(attack_plan, n_peers))
+        devices.append(initialise_benign_device(n_peers + 1))
 
         if observer_ips is None:
             observer_ips = ["1.1.1.0"]
@@ -363,7 +363,6 @@ class Setups:
 
 def run_ips_sim_for_2b():
     exp_name = "_ips_sim"
-    dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     timestamp = str(time.time())
     timestamp = "1595842634.7445016"
     # for peer_id in range(1, 10):
@@ -395,15 +394,15 @@ def run_ips_sim_for_2b():
             data = json.load(f)
             rounds = sorted(list(map(int, data.keys())))
             for r in rounds:
-                nscore, nconfidence, score, confidence = data[str(r)]["1.1.1.0"]["1.1.1.10"]
-                detection = compute_detection(nscore, nconfidence, score, confidence, 1)
+                net_score, net_confidence, score, confidence = data[str(r)]["1.1.1.0"]["1.1.1.10"]
+                detection = compute_detection(net_score, net_confidence, score, confidence, 1)
                 detections_in_peers[peer_ip].append(detection)
 
-    linewidths = {ip: 2 for ip in ips}
+    line_widths = {ip: 2 for ip in ips}
     alphas = {ip: 1 for ip in ips}
     labels = {ip: ip for ip in ips}
 
-    visualise_raw(detections_in_peers, ips, rounds, colors, linewidths, alphas, labels)
+    visualise_raw(detections_in_peers, ips, rounds, colors, line_widths, alphas, labels)
 
 
 if __name__ == '__main__':
