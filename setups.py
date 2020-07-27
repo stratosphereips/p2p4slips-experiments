@@ -26,6 +26,37 @@ def get_default_config():
     return cfg
 
 
+def get_two_part_attack_plan(n_rounds, n_peers):
+    attack_plan = {}
+    for i in range(0, n_rounds):
+        attack_plan[i] = []
+        for peer_id in range(1, n_peers):
+            attack_plan[i].append("1.1.1." + str(peer_id))
+        if i >= (n_rounds / 2):
+            attack_plan[i].append("1.1.1.0")
+    return attack_plan
+
+
+def get_staggered_attack_plan(n_rounds, n_peers):
+    # prepare attack plan for the malicious device
+    attack_plan = {}
+
+    # the attack plan has a separate layout for each round
+    for rnd in range(0, n_rounds):
+        targets = []
+        for peer_id in range(1, n_peers):
+            # a peer will be attacked if it's id is close to the round
+            if abs(peer_id - rnd) <= 1:
+                targets.append("1.1.1." + str(peer_id))
+        attack_plan[rnd] = targets
+
+    # the observer is attacked in the second half of the experiment
+    for rnd in range(int(round(n_rounds/2)), n_rounds):
+        attack_plan[rnd].append("1.1.1.0")
+
+    return attack_plan
+
+
 class Setups:
     def __init__(self, data_dir):
         self.setups = [self.run_test_experiments]
@@ -115,17 +146,7 @@ class Setups:
     def run_2a(self, dir_prefix):
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_2a")
 
-        # prepare attack plan for the malicious device
-        attack_plan = {}
-
-        # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
-        attack_plan = {}
-        for i in range(0, 20):
-            attack_plan[i] = []
-            for peer_id in range(1, 10):
-                attack_plan[i].append("1.1.1." + str(peer_id))
-            if i >= 10:
-                attack_plan[i].append("1.1.1.0")
+        attack_plan = get_two_part_attack_plan(n_rounds=20, n_peers=10)
 
         exp_id = 0
         ctrl = self.attack_parametrised(base_dir,
@@ -140,24 +161,8 @@ class Setups:
     def run_2b(self, dir_prefix):
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_2b")
 
-        # prepare attack plan for the malicious device
-        attack_plan = {}
-
-        # the attack plan has a separate layout for each round
-        for round in range(0, 20):
-            targets = []
-            for peer_id in range(1, 10):
-                # a peer will be attacked if it's id is close to the round
-                if abs(peer_id - round) <= 1:
-                    targets.append("1.1.1." + str(peer_id))
-            attack_plan[round] = targets
-
-        # the observer is attacked in the second half of the experiment
-        for round in range(10, 20):
-            attack_plan[round].append("1.1.1.0")
-
+        attack_plan = get_staggered_attack_plan(n_rounds=20, n_peers=10)
         exp_id = 0
-
         ctrl = self.attack_parametrised(base_dir,
                                         exp_id=exp_id,
                                         n_good_peers=10,
@@ -166,6 +171,27 @@ class Setups:
                                         attack_plan=attack_plan,
                                         experiment_suffix="")
         ctrl.run_experiment()
+
+    def run_3(self, dir_prefix):
+        # malicious peers are praising the malicious device
+
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3a")
+
+        # prepare attack plan for the malicious device
+        attack_plan = get_two_part_attack_plan(n_rounds=20, n_peers=10)
+        exp_id = 0
+
+        for n_good_peers in range(1, 10):
+            ctrl = self.attack_parametrised(base_dir,
+                                            exp_id=exp_id,
+                                            n_good_peers=n_good_peers,
+                                            n_peers=10,
+                                            n_rounds=20,
+                                            attack_plan=attack_plan,
+                                            bad_peer_type="PeerLiarEveryoneIsGood",
+                                            experiment_suffix="")
+            ctrl.run_experiment()
+            time.sleep(5)
 
     def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
                                         n_malicious_peers=3):
