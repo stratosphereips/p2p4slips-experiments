@@ -67,6 +67,8 @@ def get_attack_plan_with_given_victim_count(n_rounds, n_victims):
     attack_plan = {}
     for rnd in range(0, n_rounds):
         attack_plan[rnd] = targets
+        if rnd > n_rounds/2:
+            attack_plan[rnd].append("1.1.1.0")
 
     return attack_plan
 
@@ -267,52 +269,6 @@ class Setups:
                                             experiment_suffix="")
             ctrl.run_experiment()
             time.sleep(5)
-
-    def attacker_targeting_different_amounts_of_peers(self, output_process_queue, config: configparser.ConfigParser,
-                                                      n_peers=10,
-                                                      n_victim_peers=3):
-        data_dir = self.data_dir + str(n_victim_peers) + "_attacker_targeting_different_amounts_of_peers/"
-        os.mkdir(data_dir)
-        devices = []
-        for peerid in range(0, n_peers):
-            port = 6660 + peerid
-            ip_address = "1.1.1." + str(peerid)
-            # create a good peer
-            p = Peer(output_queue=output_process_queue,
-                     config=config,
-                     data_dir=data_dir,
-                     port=port,
-                     ip_address=ip_address,
-                     name=str(peerid) + "_peer_benign")
-
-            p.start()
-            devices.append(p)
-
-        # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
-        targets_start = [device.ip_address for device in devices if device.port - 6660 >= n_peers - n_victim_peers]
-        print(targets_start)
-
-        targets_later = targets_start + ["1.1.1.0"]
-
-        attack_plan = {}
-        for i in range(0, 10):
-            attack_plan[i] = targets_start
-        for i in range(10, 20):
-            attack_plan[i] = targets_later
-
-        p = DeviceMaliciousAttackTarget(ip_address="1.1.1." + str(n_peers),
-                                        name=str(n_peers) + "_device_malicious",
-                                        is_good=False,
-                                        victim_list=attack_plan)
-        devices.append(p)
-
-        p = Device(ip_address="1.1.1." + str(n_peers + 1), name=str(n_peers + 1) + "_device_benign")
-        devices.append(p)
-
-        k = 3
-
-        ctrl = Controller(devices, 20, ["1.1.1.0"], ["1.1.1.10", "1.1.1.11"], data_dir)
-        return ctrl
 
     def attack_observer_no_peers(self, output_process_queue,
                                  config: configparser.ConfigParser,
