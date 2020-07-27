@@ -179,11 +179,10 @@ class Setups:
 
         # prepare attack plan for the malicious device
         attack_plan = get_two_part_attack_plan(n_rounds=20, n_peers=10)
-        exp_id = 0
 
         for n_good_peers in range(1, 10):
             ctrl = self.attack_parametrised(base_dir,
-                                            exp_id=exp_id,
+                                            exp_id=n_good_peers,
                                             n_good_peers=n_good_peers,
                                             n_peers=10,
                                             n_rounds=20,
@@ -554,7 +553,8 @@ if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     s = Setups("")
     # s.run_test_experiments(dirname)
-    s.run_2b(dirname)
+    # s.run_2b(dirname)
+    s.run_3(dirname)
 
     # run_ips_sim_for_2b()
 
