@@ -224,13 +224,33 @@ class Setups:
             ctrl.run_experiment()
             time.sleep(5)
 
-    def run_3(self, dir_prefix):
+    def run_3a(self, dir_prefix):
         # malicious peers are praising the malicious device
 
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3a")
 
         # prepare attack plan for the malicious device
         attack_plan = get_two_part_attack_plan(n_rounds=20, n_peers=10)
+
+        for n_good_peers in range(1, 10):
+            ctrl = self.attack_parametrised(base_dir,
+                                            exp_id=n_good_peers,
+                                            n_good_peers=n_good_peers,
+                                            n_peers=10,
+                                            n_rounds=20,
+                                            attack_plan=attack_plan,
+                                            bad_peer_type="PeerLiarEveryoneIsGood",
+                                            experiment_suffix="")
+            ctrl.run_experiment()
+            time.sleep(5)
+
+    def run_3b(self, dir_prefix):
+        # malicious peers are praising the malicious device
+
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3b")
+
+        # prepare attack plan for the malicious device
+        attack_plan = get_staggered_attack_plan(n_rounds=20, n_peers=10)
 
         for n_good_peers in range(1, 10):
             ctrl = self.attack_parametrised(base_dir,
@@ -410,5 +430,6 @@ if __name__ == '__main__':
     s = Setups("")
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
+    s.run_3b(dirname)
     # s.run_3(dirname)
-    s.run_4(dirname)
+    # s.run_4(dirname)
