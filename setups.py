@@ -57,6 +57,20 @@ def get_staggered_attack_plan(n_rounds, n_peers):
     return attack_plan
 
 
+def get_attack_plan_with_given_victim_count(n_rounds, n_victims):
+    targets = []
+    for i in range(0, n_victims):
+        victim_ip = "1.1.1." + str(i + 1)
+        targets.append(victim_ip)
+
+    # the attack plan has a the same layout for each round
+    attack_plan = {}
+    for rnd in range(0, n_rounds):
+        attack_plan[rnd] = targets
+
+    return attack_plan
+
+
 class Setups:
     def __init__(self, data_dir):
         self.setups = [self.run_test_experiments]
@@ -194,6 +208,23 @@ class Setups:
                                         attack_plan=attack_plan,
                                         experiment_suffix="")
         ctrl.run_experiment()
+
+    def run_2c(self, dir_prefix):
+        # malicious device attacks different amounts of peers, no malicious peers are present
+
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_2c")
+
+        for n_victims in range(1, 10):
+            attack_plan = get_attack_plan_with_given_victim_count(n_rounds=20, n_victims=n_victims)
+            ctrl = self.attack_parametrised(base_dir,
+                                            exp_id=n_victims,
+                                            n_good_peers=10,
+                                            n_peers=10,
+                                            n_rounds=20,
+                                            attack_plan=attack_plan,
+                                            experiment_suffix="")
+            ctrl.run_experiment()
+            time.sleep(5)
 
     def run_3(self, dir_prefix):
         # malicious peers are praising the malicious device
