@@ -30,6 +30,41 @@ class Setups:
     def __init__(self, data_dir):
         self.setups = [self.get_test_experiment]
         self.data_dir = data_dir
+        self.initialise_bad_peers = {"PeerLiarEveryoneIsGood": self.initialise_liar_everyone_is_good}
+
+    def initialise_good_peer(self,
+                             queue,
+                             config,
+                             data_dir,
+                             peer_id,
+                             port_base=6660,
+                             ip_base="1.1.1.",
+                             name_suffix="_good_peer"):
+        p = Peer(output_queue=queue,
+                  config=config,
+                  data_dir=data_dir,
+                  port=port_base + peer_id,
+                  ip_address=ip_base + str(peer_id),
+                  name=str(peer_id) + name_suffix)
+        p.start()
+        return p
+
+    def initialise_liar_everyone_is_good(self,
+                                         queue,
+                                         config,
+                                         data_dir,
+                                         peer_id,
+                                         port_base=6660,
+                                         ip_base="1.1.1.",
+                                         name_suffix="_peer_liar_everyone_is_good"):
+        p = PeerLiarEveryoneIsGood(output_queue=queue,
+                                   config=config,
+                                   port=port_base + peer_id,
+                                   data_dir=data_dir,
+                                   ip_address=ip_base + str(peer_id),
+                                   name=str(peer_id) + name_suffix)
+        p.start()
+        return p
 
     def get_experiment(self, id, output_process_queue, config):
         return self.setups[id](id, output_process_queue, config)
@@ -37,28 +72,17 @@ class Setups:
     def get_test_experiment(self, identifier: int, output_process_queue, config: configparser.ConfigParser):
         data_dir = self.data_dir + str(identifier) + "/"
         os.mkdir(data_dir)
-        p0 = Peer(output_queue=output_process_queue,
-                  config=config,
-                  data_dir=data_dir,
-                  port=6660,
-                  ip_address="1.1.1.0",
-                  name="0_peer_benign")
-        p0.start()
+
+        p0 = self.initialise_good_peer(output_process_queue, config, data_dir, 0)
 
         # later, this device will be malicious
         p1 = DeviceMalicious(ip_address="1.1.1.1", name="1_device_malicious", is_good=False)
 
-        p2 = PeerLiarEveryoneIsGood(output_queue=output_process_queue,
-                                    config=config,
-                                    port=6662,
-                                    data_dir=data_dir,
-                                    ip_address="1.1.1.2",
-                                    name="2_peer_malicious")
-        p2.start()
+        p2 = self.initialise_liar_everyone_is_good(output_process_queue, config, data_dir, 2)
 
-        peers = [p0, p1, p2]
+        devices = [p0, p1, p2]
 
-        ctrl = Controller(peers, 3, ["1.1.1.0"], ["1.1.1.1"], data_dir)
+        ctrl = Controller(devices, 3, ["1.1.1.0"], ["1.1.1.1"], data_dir)
         return ctrl
 
     def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
@@ -279,14 +303,13 @@ class Setups:
                             n_rounds=20,
                             bad_peer_type="Something_here",
                             attack_plan=None,
-                            exp_name="/",
+                            experiment_suffix="/",
                             observer_ips=None,
                             observed_ips=None):
 
-        data_dir = self.data_dir + str(exp_id) + exp_name
+        data_dir = self.data_dir + str(exp_id) + experiment_suffix
         os.mkdir(data_dir)
         devices = []
-        badmouthing_targets = ["1.1.1.11"]
 
         # create good peers
         for peerid in range(0, n_good_peers):
