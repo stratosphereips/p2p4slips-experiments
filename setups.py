@@ -112,6 +112,31 @@ class Setups:
                                         observed_ips=observed_ips)
         ctrl.run_experiment()
 
+    def run_2a(self, dir_prefix):
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_2a")
+
+        # prepare attack plan for the malicious device
+        attack_plan = {}
+
+        # the malicious device will attack everyone except 1.1.1.0 in the first part of the experiment
+        attack_plan = {}
+        for i in range(0, 20):
+            attack_plan[i] = []
+            for peer_id in range(1, 10):
+                attack_plan[i].append("1.1.1." + str(peer_id))
+            if i >= 10:
+                attack_plan[i].append("1.1.1.0")
+
+        exp_id = 0
+        ctrl = self.attack_parametrised(base_dir,
+                                        exp_id=exp_id,
+                                        n_good_peers=10,
+                                        n_peers=10,
+                                        n_rounds=20,
+                                        attack_plan=attack_plan,
+                                        experiment_suffix="")
+        ctrl.run_experiment()
+
     def run_2b(self, dir_prefix):
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_2b")
 
@@ -119,7 +144,7 @@ class Setups:
         attack_plan = {}
 
         # the attack plan has a separate layout for each round
-        for round in range(0, 11):
+        for round in range(0, 20):
             targets = []
             for peer_id in range(1, 10):
                 # a peer will be attacked if it's id is close to the round
@@ -128,8 +153,8 @@ class Setups:
             attack_plan[round] = targets
 
         # the observer is attacked in the second half of the experiment
-        for round in range(11, 20):
-            attack_plan[round] = ["1.1.1.0"]
+        for round in range(10, 20):
+            attack_plan[round].append("1.1.1.0")
 
         exp_id = 0
 
