@@ -1,7 +1,10 @@
 import configparser
+import json
 import os
 import time
 from multiprocessing import Queue
+
+import matplotlib
 
 from outputProcess import OutputProcess
 from p2ptrust.testing.experiments.controller import Controller
@@ -11,6 +14,8 @@ from p2ptrust.testing.experiments.custom_devices.device_malicious_attack_target 
 from p2ptrust.testing.experiments.custom_devices.peer import Peer
 from p2ptrust.testing.experiments.custom_devices.peer_liar_everyone_is_good import PeerLiarEveryoneIsGood
 from p2ptrust.testing.experiments.custom_devices.peer_liar_target_is_bad import PeerLiarTargetIsBad
+from p2ptrust.testing.experiments.evaluator import compute_detection
+from p2ptrust.testing.experiments.output_processor import visualise_raw
 from p2ptrust.testing.experiments.utils import init_experiments
 from slips.core.database import __database__
 
@@ -227,13 +232,17 @@ class Setups:
         return ctrl
 
 
-    def attack_observer_no_peers(self, output_process_queue, config: configparser.ConfigParser):
+    def attack_observer_no_peers(self, output_process_queue,
+                                 config: configparser.ConfigParser,
+                                 exp_id=0,
+                                 attack_plan=None,
+                                 exp_name="_keep_malicious_device_unblocked/"):
         # how many attackers does it take to keep communicating with a malicious device?
         # there are 10 peers total, 0-9 of them are malicious.
         # There is a malicious device that is attacking everyone except peer 1
         # after 10 round, this device starts attacking everyone.
         # there is also a benign device 11
-        data_dir = self.data_dir + "0_keep_malicious_device_unblocked/"
+        data_dir = self.data_dir + str(exp_id) + exp_name
         os.mkdir(data_dir)
         devices = []
         p = Peer(output_queue=output_process_queue,
@@ -245,11 +254,12 @@ class Setups:
         p.start()
         devices.append(p)
 
-        targets = ["1.1.1.0"]
 
-        attack_plan = {}
-        for i in range(0, 20):
-            attack_plan[i] = targets
+        if attack_plan is None:
+            targets = ["1.1.1.0"]
+            attack_plan = {}
+            for i in range(0, 20):
+                attack_plan[i] = targets
 
         p = DeviceMaliciousAttackTarget(ip_address="1.1.1.10",
                                         name="10_device_malicious",
@@ -292,11 +302,58 @@ def run_attack_observer():
     time.sleep(10)
 
 
+def run_ips_sim_for_2b():
+    exp_name = "_ips_sim"
+    dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
+    timestamp = str(time.time())
+    timestamp = "1595842634.7445016"
+    # for peer_id in range(1, 10):
+    #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+    #     s = Setups(base_dir)
+    #     attack_plan = {}
+    #     for i in range(0, 20):
+    #         targets = []
+    #         if abs(peer_id - i) <= 1:
+    #             targets.append("1.1.1.0")
+    #         attack_plan[i] = targets
+    #     ctrl = s.attack_observer_no_peers(queue, config, exp_id=peer_id, attack_plan=attack_plan, exp_name=exp_name)
+    #     ctrl.run_experiment_ids_only()
+    #     queue_thread.kill()
+    #     time.sleep(10)
+
+    # a directory dirname was created, all data is there
+    detections_in_peers = {}
+    colors = {}
+    ips = []
+    cmap = matplotlib.cm.get_cmap('OrRd')
+    for peer_id in range(1, 10):
+        peer_ip = "1.1.1." + str(peer_id)
+        colors[peer_ip] = cmap(peer_id/15 + 0.3)
+        detections_in_peers[peer_ip] = []
+        ips.append(peer_ip)
+        exp_file = dirname + timestamp  + "/" + str(peer_id) + exp_name + "round_results.txt"
+        with open(exp_file, "r") as f:
+            data = json.load(f)
+            rounds = sorted(list(map(int, data.keys())))
+            for r in rounds:
+                nscore, nconfidence, score, confidence = data[str(r)]["1.1.1.0"]["1.1.1.10"]
+                detection = compute_detection(nscore, nconfidence, score, confidence, 1)
+                detections_in_peers[peer_ip].append(detection)
+
+    linewidths = {ip: 2 for ip in ips}
+    alphas = {ip: 1 for ip in ips}
+    labels = {ip: ip for ip in ips}
+
+    visualise_raw(detections_in_peers, ips, rounds, colors, linewidths, alphas, labels)
+
+
+
+
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     timestamp = str(time.time())
 
-    run_attack_observer()
+    run_ips_sim_for_2b()
 
     # for n_malicious_peers in range(1, 10):
     #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)

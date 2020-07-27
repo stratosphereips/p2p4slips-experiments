@@ -1,7 +1,12 @@
 import json
+import time
+
+import matplotlib
 
 from p2ptrust.testing.experiments.output_processor import visualise, find_best_threshold_long_table, \
     create_enormous_table, visualise_raw
+# from p2ptrust.testing.experiments.setups import Setups
+# from p2ptrust.testing.experiments.utils import init_experiments
 
 
 def compute_detection(nscore, nconfidence, score, confidence, weight_ips):
@@ -146,6 +151,27 @@ def exp_2a_get_attack_curves():
     visualise_raw(data, ips, rounds, colors, linewidths, alphas, labels)
 
 
+def exp_2b_get_attack_curves():
+
+    data = {'1.1.1.10':
+                [-0.24, -0.8, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                 -1.0, -1.0, -1.0],
+            '1.1.1.11':
+                [0.03, 0.12, 0.27, 0.4, 0.5, 0.6, 0.7, 0.7999999999999999, 0.8999999999999999, 0.9999999999999999, -0.4,
+                 -0.8, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+            }
+
+    rounds = list(range(0, 20))
+    ips = ["1.1.1.10", "1.1.1.11"]
+
+    colors = {"1.1.1.10": "red", "1.1.1.11": "orange"}
+    linewidths = {"1.1.1.10": 5, "1.1.1.11": 2}
+    alphas = {"1.1.1.10": 0.8, "1.1.1.11": 1.0}
+    labels = {"1.1.1.10": "Another Peer", "1.1.1.11": "Observer"}
+
+    visualise_raw(data, ips, rounds, colors, linewidths, alphas, labels)
+
+
 def fptp2acc(data: dict):
     """ Convert TP/FP/TN/TP counts to accuracy for each IP, and also combined"""
     # expected data is data[ip1, ip2][fp, tp, fn, tn] = number of occurences
@@ -178,8 +204,10 @@ if __name__ == '__main__':
     # exp_suffix = "_keep_malicious_device_unblocked"
 
     # eval_exp_2a_no_malicious()
-    exp_2a_get_attack_curves()
+    # exp_2a_get_attack_curves()
     # eval_exp_1_ips_only()
+
+    run_ips_sim_for_2b()
 
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595605824.1189618/"
     # exp_suffix = "_attacker_targeting_different_amounts_of_peers"
