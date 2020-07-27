@@ -131,6 +131,31 @@ def eval_exp_2a_no_malicious():
     create_enormous_table(accuracies)
 
 
+def eval_exp_2b_no_malicious():
+    exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595856479.8787048_exp_2b/"
+    exp_suffix = ""
+    exp_id = 0
+
+    is_good = {"1.1.1.10": False, "1.1.1.11": True}
+    thresholds = [x / 10 for x in range(-10, 11)]
+    weights = [x / 10 for x in range(0, 11)]
+    accuracies = {}
+
+    data_file = exp_dir + str(exp_id) + exp_suffix + "/round_results.txt"
+    with open(data_file, "r") as f:
+        data = json.load(f)
+        for threshold in thresholds:
+            accuracies[threshold] = {}
+            for ips_weight in weights:
+                print("Experiment id: " + str(exp_id) + "/10, t = " + str(threshold) + ", w = " + str(ips_weight))
+                accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=ips_weight, show_visualisation=False)
+                accuracy_processed = fptp2acc(accuracy)
+                accuracies[threshold][ips_weight] = accuracy_processed
+                k = 3
+
+    create_enormous_table(accuracies)
+
+
 def exp_2a_get_attack_curves():
     data = {'1.1.1.10':
                 [-0.24, -0.8, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
@@ -207,7 +232,8 @@ if __name__ == '__main__':
     # exp_2a_get_attack_curves()
     # eval_exp_1_ips_only()
 
-    run_ips_sim_for_2b()
+    # run_ips_sim_for_2b()
+    eval_exp_2b_no_malicious()
 
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595605824.1189618/"
     # exp_suffix = "_attacker_targeting_different_amounts_of_peers"
