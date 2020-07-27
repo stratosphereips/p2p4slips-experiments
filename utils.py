@@ -45,7 +45,18 @@ def get_network_score_confidence(storage_name, ip):
     return score, confidence
 
 
-def init_experiments(base_dir, exp_name="", timestamp=""):
+def prepare_experiments_dir(base_dir, exp_name="", timestamp=""):
+    if timestamp == "":
+        timestamp = str(time.time())
+    base_dir = base_dir + timestamp + exp_name + "/"
+
+    if not os.path.exists(base_dir):
+        os.mkdir(base_dir)
+
+    return base_dir
+
+
+def init_experiment(base_dir, exp_id, exp_suffix=""):
     config = get_default_config()
     output_process_queue = Queue()
     output_process_thread = OutputProcess(output_process_queue, 1, 1, config)
@@ -55,11 +66,9 @@ def init_experiments(base_dir, exp_name="", timestamp=""):
     __database__.start(config)
     __database__.setOutputQueue(output_process_queue)
 
-    if timestamp == "":
-        timestamp = str(time.time())
-    base_dir = base_dir + timestamp + exp_name + "/"
+    exp_dir = base_dir + str(exp_id) + exp_suffix + "/"
 
-    if not os.path.exists(base_dir):
-        os.mkdir(base_dir)
+    if not os.path.exists(exp_dir):
+        os.mkdir(exp_dir)
 
-    return config, output_process_queue, output_process_thread, base_dir
+    return config, output_process_queue, output_process_thread, exp_dir

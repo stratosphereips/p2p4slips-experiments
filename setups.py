@@ -16,7 +16,7 @@ from p2ptrust.testing.experiments.custom_devices.peer_liar_everyone_is_good impo
 from p2ptrust.testing.experiments.custom_devices.peer_liar_target_is_bad import PeerLiarTargetIsBad
 from p2ptrust.testing.experiments.evaluator import compute_detection
 from p2ptrust.testing.experiments.output_processor import visualise_raw
-from p2ptrust.testing.experiments.utils import init_experiments
+from p2ptrust.testing.experiments.utils import init_experiment, prepare_experiments_dir
 from slips.core.database import __database__
 
 
@@ -28,7 +28,7 @@ def get_default_config():
 
 class Setups:
     def __init__(self, data_dir):
-        self.setups = [self.get_test_experiment]
+        self.setups = [self.run_test_experiments]
         self.data_dir = data_dir
         self.initialise_bad_peers = {"PeerLiarEveryoneIsGood": self.initialise_liar_everyone_is_good}
 
@@ -93,24 +93,41 @@ class Setups:
     def get_experiment(self, id, output_process_queue, config):
         return self.setups[id](id, output_process_queue, config)
 
-    def get_test_experiment(self, dir_prefix):
+    def run_test_experiments(self, dir_prefix):
         observer_ips = ["1.1.1.0"]
         observed_ips = ["1.1.1.1"]
-        config, queue, queue_thread, base_dir = init_experiments(dir_prefix, exp_name="_test_experiment")
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_0_tests")
 
-        ctrl = self.attack_parametrised(queue,
-                                        config,
-                                        base_dir,
-                                        exp_id=0,
+        exp_id = 0
+
+        ctrl = self.attack_parametrised(base_dir,
+                                        exp_id=exp_id,
                                         n_good_peers=1,
                                         n_peers=2,
                                         n_rounds=3,
                                         bad_peer_type="PeerLiarEveryoneIsGood",
                                         attack_plan=None,
+                                        experiment_suffix="_my_test_exp",
                                         observer_ips=observer_ips,
-                                        observed_ips=observed_ips,
-                                        queue_thread=queue_thread)
-        return ctrl
+                                        observed_ips=observed_ips)
+        ctrl.run_experiment()
+
+    def run_2b(self, dir_prefix):
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_2b")
+        timestamp = str(time.time()) + "_exp2b"
+        for peer_id in range(1, 10):
+            config, queue, queue_thread, base_dir = init_experiment(base_dir)
+            s = Setups(base_dir)
+            attack_plan = {}
+            for i in range(0, 20):
+                targets = []
+                if abs(peer_id - i) <= 1:
+                    targets.append("1.1.1.0")
+                attack_plan[i] = targets
+            ctrl = s.attack_observer_no_peers(queue, config, exp_id=peer_id, attack_plan=attack_plan)
+            ctrl.run_experiment_ids_only()
+            queue_thread.kill()
+            time.sleep(10)
 
     def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
                                         n_malicious_peers=3):
@@ -322,9 +339,7 @@ class Setups:
         return ctrl
 
     def attack_parametrised(self,
-                            output_process_queue,
-                            config: configparser.ConfigParser,
-                            base_dir: str,
+                            dir_prefix: str,
                             exp_id=0,
                             n_good_peers=10,
                             n_peers=10,
@@ -332,20 +347,19 @@ class Setups:
                             bad_peer_type="Something_here",
                             bad_peer_params=None,
                             attack_plan=None,
-                            experiment_suffix="/",
+                            experiment_suffix="",
                             observer_ips=None,
-                            observed_ips=None,
-                            queue_thread=None):
+                            observed_ips=None):
 
-        data_dir = base_dir + str(exp_id) + experiment_suffix
-        os.mkdir(data_dir)
+        config, queue, queue_thread, data_dir = init_experiment(dir_prefix, exp_id=exp_id, exp_suffix=experiment_suffix)
+
         devices = []
 
         # create good peers
         for peerid in range(0, n_good_peers):
             port = 6660 + peerid
             ip_address = "1.1.1." + str(peerid)
-            p = Peer(output_queue=output_process_queue,
+            p = Peer(output_queue=queue,
                      config=config,
                      data_dir=data_dir,
                      port=port,
@@ -360,7 +374,7 @@ class Setups:
             port = 6660 + peerid
             ip_address = "1.1.1." + str(peerid)
             print(port, ip_address, bad_peer_type)
-            p = self.initialise_bad_peers[bad_peer_type](queue=output_process_queue,
+            p = self.initialise_bad_peers[bad_peer_type](queue=queue,
                                                          config=config,
                                                          data_dir=data_dir,
                                                          peer_id=peerid,
@@ -382,7 +396,7 @@ class Setups:
 
 def run_atdaop(n_peers=10):
     for i in range(1, n_peers):
-        config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+        config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
         s = Setups(base_dir)
         ctrl = s.attacker_targeting_different_amounts_of_peers(queue, config, n_peers, i)
         ctrl.run_experiment()
@@ -392,7 +406,7 @@ def run_atdaop(n_peers=10):
 
 def run_kmdu(n_peers=10):
     for i in range(0, n_peers):
-        config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+        config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
         s = Setups(base_dir)
         ctrl = s.keep_malicious_device_unblocked(queue, config, n_peers, i)
         ctrl.run_experiment()
@@ -401,7 +415,7 @@ def run_kmdu(n_peers=10):
 
 
 def run_attack_observer():
-    config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+    config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
     s = Setups(base_dir)
     ctrl = s.attack_observer_no_peers(queue, config)
     ctrl.run_experiment_ids_only()
@@ -413,7 +427,7 @@ def run_2b():
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     timestamp = str(time.time()) + "_exp2b"
     for peer_id in range(1, 10):
-        config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+        config, queue, queue_thread, base_dir = init_experiment(dirname, timestamp=timestamp)
         s = Setups(base_dir)
         attack_plan = {}
         for i in range(0, 20):
@@ -475,8 +489,7 @@ def run_ips_sim_for_2b():
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
     s = Setups("")
-    ctrl = s.get_test_experiment(dirname)
-    ctrl.run_experiment()
+    s.run_test_experiments(dirname)
 
     # run_ips_sim_for_2b()
 
