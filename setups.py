@@ -450,6 +450,6 @@ if __name__ == '__main__':
     s = Setups("")
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
-    s.run_3b(dirname)
+    s.run_3c(dirname)
     # s.run_3(dirname)
     # s.run_4(dirname)
