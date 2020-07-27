@@ -108,7 +108,8 @@ class Setups:
                                         bad_peer_type="PeerLiarEveryoneIsGood",
                                         attack_plan=None,
                                         observer_ips=observer_ips,
-                                        observed_ips=observed_ips)
+                                        observed_ips=observed_ips,
+                                        queue_thread=queue_thread)
         return ctrl
 
     def keep_malicious_device_unblocked(self, output_process_queue, config: configparser.ConfigParser, n_peers=10,
@@ -333,7 +334,8 @@ class Setups:
                             attack_plan=None,
                             experiment_suffix="/",
                             observer_ips=None,
-                            observed_ips=None):
+                            observed_ips=None,
+                            queue_thread=None):
 
         data_dir = base_dir + str(exp_id) + experiment_suffix
         os.mkdir(data_dir)
@@ -374,7 +376,7 @@ class Setups:
         if observed_ips is None:
             observed_ips = ["1.1.1.10", "1.1.1.11"]
 
-        ctrl = Controller(devices, n_rounds, observer_ips, observed_ips, data_dir)
+        ctrl = Controller(devices, n_rounds, observer_ips, observed_ips, data_dir, queue_thread=queue_thread)
         return ctrl
 
 

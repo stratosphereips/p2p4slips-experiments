@@ -11,7 +11,7 @@ from p2ptrust.testing.experiments.utils import publish_str_to_channel, NetworkUp
 
 
 class Controller:
-    def __init__(self, devices: list, rounds: int, control_ips: list, observed_ips: list, data_dir, timeouts: int = 5):
+    def __init__(self, devices: list, rounds: int, control_ips: list, observed_ips: list, data_dir, timeouts: int = 5, queue_thread = None):
         self.devices = devices
         self.rounds = rounds
         self.data_dir = data_dir
@@ -33,6 +33,8 @@ class Controller:
         # start slips simulator (doesn't actively listen to anything, but can be called in functions)
         self.hub = SlipsHub(self.ipdb, self.control_ips, self.observed_ips)
         self.attack_history = []
+
+        self.queue_thread = queue_thread
 
     def run_experiment(self):
 
@@ -58,14 +60,12 @@ class Controller:
             time.sleep(1)
             self.attack_history.append(attacks)
 
-        evaluate(self.hub.observations, self.ipdb, self.rounds)
+        is_good = {device.ip_address: device.is_good for device in self.ipdb.devices}
+        evaluate(self.hub.observations, self.rounds, is_good)
         self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
 
         time.sleep(1)
-        for device in self.devices:
-            if device.is_peer:
-                publish_str_to_channel("ip_info_change" + str(device.port), "stop_process")
-                self.dovecot.kill()
+        self.stop()
         self.export_experiment_data()
 
     def run_experiment_ids_only(self):
@@ -87,9 +87,7 @@ class Controller:
         # self.hub.sampler.show_score_graphs(self.control_ips[0], self.observed_ips[0])
 
         time.sleep(1)
-        for device in self.devices:
-            if device.is_peer:
-                publish_str_to_channel("ip_info_change" + str(device.port), "stop_process")
+        self.stop()
         self.export_experiment_data()
 
     def process_round_start(self, peer: Device, action: NetworkUpdate, params: str):
@@ -120,3 +118,19 @@ class Controller:
 
         with open(self.data_dir + "attack_history.txt", 'w') as outfile:
             json.dump(attack_history, outfile)
+
+    def stop(self):
+        for device in self.devices:
+            if device.is_peer:
+                publish_str_to_channel("ip_info_change" + str(device.port), "stop_process")
+
+        # stop the dovecot, if it was running
+        try:
+            self.dovecot.kill()
+        except:
+            pass
+
+        try:
+            self.queue_thread.kill()
+        except:
+            pass
