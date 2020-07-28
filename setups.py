@@ -62,7 +62,7 @@ def get_attack_plan_with_given_victim_count(n_rounds, n_victims):
     # the attack plan has a the same layout for each round
     attack_plan = {}
     for rnd in range(0, n_rounds):
-        attack_plan[rnd] = targets
+        attack_plan[rnd] = [t for t in targets]
         if rnd > n_rounds/2:
             attack_plan[rnd].append("1.1.1.0")
 
@@ -451,6 +451,6 @@ if __name__ == '__main__':
     s = Setups("")
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
-    s.run_2a(dirname)
+    s.run_3c(dirname)
     # s.run_3(dirname)
     # s.run_4(dirname)
