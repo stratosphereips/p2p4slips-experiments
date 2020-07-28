@@ -119,46 +119,57 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
     thickhline = "\\thickhline"
 
     # prepare table width
-    column_specs = "\\begin{tabular}{|c|c\"" + ("c|" * len(thresholds)) + "}"
+    if skip_individual_ips:
+        one_more_column = ""
+    else:
+        one_more_column = "|c"
+
+    column_specs = "\\begin{tabular}{|c" + one_more_column + "\"" + ("c|" * len(thresholds)) + "}"
     output_lines.append(column_specs)
 
     output_lines.append(thickhline)
 
     # make header
-    header = "\multicolumn{2}{|c\"}{\\backslashbox[26mm]{$w$}{$T$}} & " + "".join([str(t) + " & " for t in thresholds])[:-2] + "\\\\"
+    if skip_individual_ips:
+        header = "\\backslashbox{$w$}{$T$} & " + "".join([str(t) + " & " for t in thresholds])[:-2] + "\\\\"
+    else:
+        header = "\\multicolumn{2}{|c\"}{\\backslashbox[26mm]{$w$}{$T$}} & " + "".join(
+            [str(t) + " & " for t in thresholds])[:-2] + "\\\\"
     output_lines.append(header)
 
     output_lines.append(thickhline)
 
     if skip_individual_ips:
-        multirow_start = ""
-        multirow_end = ""
         line_separator = "\\hline"
     else:
-        multirow_start = "\multirow{3}{*}{"
-        multirow_end = "}"
         line_separator = thickhline
 
     for w in weights:
         lines = {ip: "" for ip in ips}
 
-        # initialize multiline headers
-        lines[ips[0]] += multirow_start + str(w) + multirow_end + " & " + ip_names[ips[0]]
-        for ip in ips[1:]:
-            lines[ip] += " & " + ip_names[ip]
+        if skip_individual_ips:
+            lines["all"] += str(w)
+        else:
+            # initialize multiline headers
+            lines[ips[0]] += "\multirow{3}{*}{" + str(w) + "} & " + ip_names[ips[0]]
+            for ip in ips[1:]:
+                lines[ip] += " & " + ip_names[ip]
 
         # fill lines with data
         for t in thresholds:
             for ip in ips:
-                set_color = ip == "all"
-                cell_color = get_cell_color(data[t][w][ip], set_color)
-                lines[ip] += " & " + cell_color + " " + str(data[t][w][ip])
+                if ip == "all":
+                    lines[ip] += " & " + get_cell_color(data[t][w][ip], True) + " " + str(data[t][w][ip])
+                else:
+                    if not skip_individual_ips:
+                        lines[ip] += " & " + str(data[t][w][ip])
 
         # end lines and print them
-        for ip in ips[:-1]:
-            lines[ip] += "\\\\" + cline
-            if not skip_individual_ips:
-                output_lines.append(lines[ip])
+        if not skip_individual_ips:
+            for ip in ips[:-1]:
+                lines[ip] += "\\\\" + cline
+                if not skip_individual_ips:
+                    output_lines.append(lines[ip])
 
         # print last line with a thick separator
         ip = ips[-1]
