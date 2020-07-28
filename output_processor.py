@@ -124,6 +124,9 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
     else:
         one_more_column = "|c"
 
+    scaling = "\\resizebox{\\textwidth}{!}{"
+    output_lines.append(scaling)
+
     column_specs = "\\begin{tabular}{|c" + one_more_column + "\"" + ("c|" * len(thresholds)) + "}"
     output_lines.append(column_specs)
 
@@ -176,7 +179,9 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
         lines[ip] += "\\\\" + line_separator
         output_lines.append(lines[ip])
 
+    # end tabular and end scaling
     output_lines.append("\\end{tabular}")
+    output_lines.append("}")
 
     if verbose:
         for line in output_lines:
