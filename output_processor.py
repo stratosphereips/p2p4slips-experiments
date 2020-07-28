@@ -119,7 +119,7 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
     thickhline = "\\thickhline"
 
     # prepare table width
-    column_specs = "|c|c\"" + ("c|" * len(thresholds))
+    column_specs = "\\begin{tabular}{|c|c\"" + ("c|" * len(thresholds)) + "}"
     output_lines.append(column_specs)
 
     output_lines.append(thickhline)
@@ -164,6 +164,8 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
         ip = ips[-1]
         lines[ip] += "\\\\" + line_separator
         output_lines.append(lines[ip])
+
+    output_lines.append("\\end{tabular}")
 
     if verbose:
         for line in output_lines:

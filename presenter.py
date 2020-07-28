@@ -25,5 +25,7 @@ for exp_suffix in experiments:
         subfolder = exp_folder + "/" + subfolder_name
         accuracy_matrix = get_accuracy_matrix_from_results(subfolder)
         table_lines = create_enormous_table(accuracy_matrix, skip_individual_ips=True)
-        k = 3
+        break
+    break
+
 
