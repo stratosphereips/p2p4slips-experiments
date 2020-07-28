@@ -70,4 +70,5 @@ def generate_2c_imports(exp_base="2c", iter1=None, iter2=None):
         print(line)
 
 
+generate_tables()
 generate_2c_imports()
