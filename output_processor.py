@@ -106,7 +106,10 @@ def find_best_threshold_long_table(observation_results: dict):
         print("\\hline")
 
 
-def create_enormous_table(data):
+def create_enormous_table(data, skip_individual_ips=False, verbose=True):
+
+    output_lines = []
+
     # expected input is data[ip1, ip2, all] = accuracy
     thresholds = list(data.keys())
     weights = list(data[thresholds[0]].keys())
@@ -117,15 +120,15 @@ def create_enormous_table(data):
 
     # prepare table width
     column_specs = "|c|c\"" + ("c|" * len(thresholds))
-    print(column_specs)
+    output_lines.append(column_specs)
 
-    print(thickhline)
+    output_lines.append(thickhline)
 
     # make header
     header = "\multicolumn{2}{|c\"}{\\backslashbox[26mm]{$w$}{$T$}} & " + "".join([str(t) + " & " for t in thresholds])[:-2] + "\\\\"
-    print(header)
+    output_lines.append(header)
 
-    print(thickhline)
+    output_lines.append(thickhline)
 
     for w in weights:
         lines = {ip: "" for ip in ips}
@@ -145,12 +148,18 @@ def create_enormous_table(data):
         # end lines and print them
         for ip in ips[:-1]:
             lines[ip] += "\\\\" + cline
-            print(lines[ip])
+            output_lines.append(lines[ip])
 
         # print last line with a thick separator
         ip = ips[-1]
         lines[ip] += "\\\\" + thickhline
-        print(lines[ip])
+        output_lines.append(lines[ip])
+
+    if verbose:
+        for line in output_lines:
+            print(line)
+
+    return output_lines
 
 
 def get_cell_color(value, check=False):
