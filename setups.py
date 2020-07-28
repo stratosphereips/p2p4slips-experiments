@@ -269,8 +269,8 @@ class Setups:
 
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3c")
 
-        for n_good_peers in range(1, 10):
-            for n_victims in range(1, 9):
+        for n_good_peers in range(3, 4):
+            for n_victims in range(2, 5):
                 exp_id = 10*n_good_peers + n_victims
                 attack_plan = get_attack_plan_with_given_victim_count(n_rounds=20, n_victims=n_victims)
                 ctrl = self.attack_parametrised(base_dir,

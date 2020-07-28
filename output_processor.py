@@ -191,8 +191,10 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
 
 
 def get_cell_color(value, check=False):
-    if not check or value <= 0.75:
+    if not check or value < 0.75:
         return ""
+    if value == 0.75:
+        return "\\cellcolor{grayscale-e}"
     if value <= 0.8:
         return "\\cellcolor{grayscale-d}"
     if value <= 0.85:

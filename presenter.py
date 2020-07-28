@@ -1,11 +1,13 @@
 import os
+import sys
 
 from p2ptrust.testing.experiments.evaluator import get_accuracy_matrix_from_results
 from p2ptrust.testing.experiments.output_processor import create_enormous_table
 
+
 def generate_tables():
     exp_location = "/home/dita/p2ptrust-experiments-link/experiment_outputs/"
-    exp_prefix = "exp_"
+    exp_prefix = "exp"
     experiments = ["1", "2a", "2b", "2c", "3a", "3b", "3c", "4a"]
 
     tables_output_location = "/home/dita/p2ptrust-experiments-link/experiment_outputs/tables/"
@@ -13,9 +15,13 @@ def generate_tables():
 
     file = open(tables_output_name, "w")
 
-    exp_base = exp_location + exp_prefix
+    exp_base = exp_location + exp_prefix + "_"
     for exp_suffix in experiments:
         exp_folder = exp_base + exp_suffix
+
+        exp_table_folder = tables_output_location + exp_prefix + exp_suffix + "/"
+        if not os.path.exists(exp_table_folder):
+            os.mkdir(exp_table_folder)
 
         try:
             exp_folder_walk = list(os.walk(exp_folder))[0]
@@ -34,7 +40,7 @@ def generate_tables():
             file.write("\n")
             file.write("\n")
 
-            short_file = open(tables_output_location + "exp" + exp_suffix + subfolder_name + "_short.tex", "w")
+            short_file = open(exp_table_folder + exp_suffix + subfolder_name + "_short.tex", "w")
             short_file.writelines(["%s\n" % line for line in table_lines_short])
             short_file.close()
 
@@ -44,7 +50,7 @@ def generate_tables():
             file.write("\n")
             file.write("\n")
 
-            long_file = open(tables_output_location + "exp" + exp_suffix + subfolder_name + "_long.tex", "w")
+            long_file = open(exp_table_folder + exp_suffix + subfolder_name + "_long.tex", "w")
             long_file.writelines(["%s\n" % line for line in table_lines_long])
             short_file.close()
     file.close()
@@ -52,7 +58,7 @@ def generate_tables():
 
 def generate_table_imports(exp_base="2c", iter1=None, iter2=None, long=False):
     if iter1 is None:
-        iter1 = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        iter1 = [str(i) for i in range(1, 10)]
     if iter2 is None:
         iter2 = [""]
 
@@ -62,11 +68,11 @@ def generate_table_imports(exp_base="2c", iter1=None, iter2=None, long=False):
             exp_name = exp_base + i + j
 
             if long:
-                input_file = "Tables/exp" + exp_base + "/exp" + exp_name + "_long"
+                input_file = "Tables/exp" + exp_base + "/" + exp_name + "_long"
                 caption = exp_name
                 label = "tab:" + exp_name + "-long"
             else:
-                input_file = "Tables/exp" + exp_base + "/exp" + exp_name + "_short"
+                input_file = "Tables/exp" + exp_base + "/" + exp_name + "_short"
                 caption = exp_name + ". For detailed accuracy, see \\autoref{tab:" + exp_name + "-long}."
                 label = "tab:" + exp_name
 
@@ -82,6 +88,5 @@ def generate_table_imports(exp_base="2c", iter1=None, iter2=None, long=False):
     for line in output_lines:
         print(line)
 
-
-generate_tables()
-generate_table_imports(long=True)
+# generate_tables()
+generate_table_imports(exp_base="2c", long=True)
