@@ -36,6 +36,7 @@ def generate_tables():
 
             short_file = open(tables_output_location + "exp" + exp_suffix + subfolder_name + "_short.tex", "w")
             short_file.writelines(["%s\n" % line for line in table_lines_short])
+            short_file.close()
 
             table_lines_long = create_enormous_table(accuracy_matrix, skip_individual_ips=False, verbose=False)
             file.write("% " + exp_suffix + ", experiment id " + subfolder_name + ", long\n")
@@ -44,10 +45,12 @@ def generate_tables():
             file.write("\n")
 
             long_file = open(tables_output_location + "exp" + exp_suffix + subfolder_name + "_long.tex", "w")
-            long_file.writelines(["%s\n" % line for line in table_lines_short])
+            long_file.writelines(["%s\n" % line for line in table_lines_long])
+            short_file.close()
+    file.close()
 
 
-def generate_2c_imports(exp_base="2c", iter1=None, iter2=None):
+def generate_table_imports(exp_base="2c", iter1=None, iter2=None, long=False):
     if iter1 is None:
         iter1 = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     if iter2 is None:
@@ -57,11 +60,21 @@ def generate_2c_imports(exp_base="2c", iter1=None, iter2=None):
     for i in iter1:
         for j in iter2:
             exp_name = exp_base + i + j
+
+            if long:
+                input_file = "Tables/exp" + exp_base + "/exp" + exp_name + "_long"
+                caption = exp_name
+                label = "tab:" + exp_name + "-long"
+            else:
+                input_file = "Tables/exp" + exp_base + "/exp" + exp_name + "_short"
+                caption = exp_name + ". For detailed accuracy, see \\autoref{tab:" + exp_name + "-long}."
+                label = "tab:" + exp_name
+
             output_lines.append("\\begin{table}[ht]")
             output_lines.append("    \\centering")
-            output_lines.append("    \\input{Tables/exp" + exp_base + "/exp" + exp_name + "_short} % enormous table data here")
-            output_lines.append("    \\caption{" + exp_name + ". For detailed accuracy, see \\autoref{tab:" + exp_name + "-long}.}")
-            output_lines.append("    \\label{tab:" + exp_name + "}")
+            output_lines.append("    \\input{" + input_file + "} % enormous table data here")
+            output_lines.append("    \\caption{" + caption + "}")
+            output_lines.append("    \\label{" + label + "}")
             output_lines.append("\\end{table}")
             output_lines.append("")
             output_lines.append("")
@@ -71,4 +84,4 @@ def generate_2c_imports(exp_base="2c", iter1=None, iter2=None):
 
 
 generate_tables()
-generate_2c_imports()
+generate_table_imports(long=True)
