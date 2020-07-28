@@ -1,6 +1,7 @@
 import os
 
 from p2ptrust.testing.experiments.evaluator import get_accuracy_matrix_from_results
+from p2ptrust.testing.experiments.output_processor import create_enormous_table
 
 exp_location = "/home/dita/p2ptrust-experiments-link/experiment_outputs/"
 exp_prefix = "exp_"
@@ -23,4 +24,6 @@ for exp_suffix in experiments:
     for subfolder_name in subfolders:
         subfolder = exp_folder + "/" + subfolder_name
         accuracy_matrix = get_accuracy_matrix_from_results(subfolder)
+        table_lines = create_enormous_table(accuracy_matrix, skip_individual_ips=True)
+        k = 3
 

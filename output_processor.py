@@ -130,11 +130,20 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
 
     output_lines.append(thickhline)
 
+    if skip_individual_ips:
+        multirow_start = ""
+        multirow_end = ""
+        line_separator = "\\hline"
+    else:
+        multirow_start = "\multirow{3}{*}{"
+        multirow_end = "}"
+        line_separator = thickhline
+
     for w in weights:
         lines = {ip: "" for ip in ips}
 
         # initialize multiline headers
-        lines[ips[0]] += "\multirow{3}{*}{" + str(w) + "} & " + ip_names[ips[0]]
+        lines[ips[0]] += multirow_start + str(w) + multirow_end + " & " + ip_names[ips[0]]
         for ip in ips[1:]:
             lines[ip] += " & " + ip_names[ip]
 
@@ -148,11 +157,12 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
         # end lines and print them
         for ip in ips[:-1]:
             lines[ip] += "\\\\" + cline
-            output_lines.append(lines[ip])
+            if not skip_individual_ips:
+                output_lines.append(lines[ip])
 
         # print last line with a thick separator
         ip = ips[-1]
-        lines[ip] += "\\\\" + thickhline
+        lines[ip] += "\\\\" + line_separator
         output_lines.append(lines[ip])
 
     if verbose:
