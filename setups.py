@@ -267,7 +267,7 @@ class Setups:
     def run_3c(self, dir_prefix):
         # malicious peers are praising the malicious device
 
-        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3b")
+        base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3c")
 
         for n_good_peers in range(1, 10):
             for n_victims in range(1, 10):
@@ -284,8 +284,9 @@ class Setups:
                 ctrl.run_experiment()
                 time.sleep(5)
 
-    def run_4(self, dir_prefix):
+    def run_4a(self, dir_prefix):
         # badmouthing
+        # no need to run this on more reporters
 
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_4a")
 
@@ -450,6 +451,6 @@ if __name__ == '__main__':
     s = Setups("")
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
-    s.run_3c(dirname)
+    s.run_2a(dirname)
     # s.run_3(dirname)
     # s.run_4(dirname)

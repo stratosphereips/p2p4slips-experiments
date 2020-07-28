@@ -38,7 +38,6 @@ def visualise_raw(ips_raw_detections, ips, rounds, colors, linewidths, alphas, l
     matplotlib.pyplot.show()
 
 
-
 def find_best_threshold_wide_table(observation_results: dict):
     thresholds = sorted(list(observation_results.keys()))
     first_threshold = thresholds[0]

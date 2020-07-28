@@ -14,7 +14,7 @@ def compute_detection(nscore, nconfidence, score, confidence, weight_ips):
     return detection
 
 
-def evaluate(observations: dict, rounds, is_good=None, threshold=-0.5, weight_ips=0.5, show_visualisation=False):
+def evaluate(observations: dict, rounds, is_good=None, threshold=-0.5, weight_ips=0.5, show_visualisation=False, verbose=False):
 
     if is_good is None:
         is_good = {}
@@ -62,8 +62,9 @@ def evaluate(observations: dict, rounds, is_good=None, threshold=-0.5, weight_ip
     if show_visualisation:
         visualise(decisions)
 
-    print(lines[observed_ips[0]])
-    print(lines[observed_ips[1]])
+    if verbose:
+        print(lines[observed_ips[0]])
+        print(lines[observed_ips[1]])
 
     return observation_results
 
@@ -220,6 +221,28 @@ def fptp2acc(data: dict):
     return output
 
 
+def get_accuracy_matrix_from_results(exp_folder, thresholds=None, weights=None, is_good=None):
+    if is_good is None:
+        is_good = {"1.1.1.10": False, "1.1.1.11": True}
+
+    if thresholds is None:
+        thresholds = [x / 10 for x in range(-10, 11)]
+
+    if weights is None:
+        weights = [x / 10 for x in range(0, 11)]
+
+    accuracies = {}
+    data_file = exp_folder + "/round_results.txt"
+    with open(data_file, "r") as f:
+        data = json.load(f)
+        for threshold in thresholds:
+            accuracies[threshold] = {}
+            for ips_weight in weights:
+                accuracy = evaluate(data, 20, is_good, threshold=threshold, weight_ips=ips_weight, show_visualisation=False)
+                accuracy_processed = fptp2acc(accuracy)
+                accuracies[threshold][ips_weight] = accuracy_processed
+
+    return accuracies
 
 
 if __name__ == '__main__':
