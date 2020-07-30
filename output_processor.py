@@ -106,7 +106,7 @@ def find_best_threshold_long_table(observation_results: dict):
         print("\\hline")
 
 
-def create_enormous_table(data, skip_individual_ips=False, verbose=True):
+def create_enormous_table(data, skip_individual_ips=False, verbose=True, scale=1, param_weight=-2, param_threshold=-2, param_name=""):
 
     output_lines = []
 
@@ -162,7 +162,9 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
         for t in thresholds:
             for ip in ips:
                 if ip == "all":
-                    lines[ip] += " & " + get_cell_color(data[t][w][ip], True) + " " + str(data[t][w][ip])
+                    lines[ip] += " & " + get_cell_color(data[t][w][ip], True, scale=scale) + " " + str(data[t][w][ip])
+                    if t == param_threshold and w == param_weight and data[t][w][ip] >= 0.75:
+                        print(param_name, data[t][w][ip])
                 else:
                     if not skip_individual_ips:
                         lines[ip] += " & " + str(data[t][w][ip])
@@ -190,17 +192,42 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True):
     return output_lines
 
 
-def get_cell_color(value, check=False):
-    if not check or value < 0.75:
+def lists_to_table(data):
+    table_width = len(data[0])
+    hline = "\\hline"
+    output = []
+    header = "\\begin{tabular}{|" + ("c|" * table_width) + "}"
+    output.append(header)
+    output.append(hline)
+    for line in data:
+        line_out = ""
+        for cell in line:
+            try:
+                content = float(cell)
+                line_out += get_cell_color(content, True) + cell + " & "
+            except ValueError:
+                line_out += cell + " & "
+
+        output.append(line_out[:-2] + "\\\\" + hline)
+    output.append("\\end{tabular}")
+
+    for l in output:
+        print(l)
+
+
+def get_cell_color(value, check=False, scale=1):
+    thresholds = [0.75, 0.8, 0.85, 0.9, 0.95]
+    thresholds = [scale*t for t in thresholds]
+    if not check or value < thresholds[0]:
         return ""
-    if value == 0.75:
+    if value == thresholds[0] :
         return "\\cellcolor{grayscale-e}"
-    if value <= 0.8:
+    if value <= thresholds[1]:
         return "\\cellcolor{grayscale-d}"
-    if value <= 0.85:
+    if value <= thresholds[2]:
         return "\\cellcolor{grayscale-c}"
-    if value <= 0.9:
+    if value <= thresholds[3]:
         return "\\cellcolor{grayscale-b}"
-    if value <= 0.95:
+    if value <= thresholds[4]:
         return "\\cellcolor{grayscale-a}"
     return "\\cellcolor{grayscale-9}"

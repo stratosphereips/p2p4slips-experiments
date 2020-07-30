@@ -264,14 +264,16 @@ class Setups:
             ctrl.run_experiment()
             time.sleep(5)
 
-    def run_3c(self, dir_prefix):
+    def run_3c(self, dir_prefix, missing_setups=None):
         # malicious peers are praising the malicious device
 
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3c")
 
-        for n_good_peers in range(3, 4):
-            for n_victims in range(2, 5):
+        for n_good_peers in range(5, 10):
+            for n_victims in range(1, 10):
                 exp_id = 10*n_good_peers + n_victims
+        if True:
+            for exp_id in missing_setups:
                 attack_plan = get_attack_plan_with_given_victim_count(n_rounds=20, n_victims=n_victims)
                 ctrl = self.attack_parametrised(base_dir,
                                                 exp_id=exp_id,
@@ -448,8 +450,9 @@ def run_ips_sim_for_2b():
 
 if __name__ == '__main__':
     dirname = "/home/dita/ownCloud/stratosphere/SLIPS/modules/p2ptrust/testing/experiments/experiment_data/experiments-"
+    missing_setups = [19, 29, 39, 41, 42, 43, 44, 46, 47, 48, 49, 97, 98, 99]
     s = Setups("")
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
-    s.run_3c(dirname)
+    s.run_3c(dirname, missing_setups)
     # s.run_4(dirname)

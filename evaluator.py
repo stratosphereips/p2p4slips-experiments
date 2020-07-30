@@ -245,6 +245,71 @@ def get_accuracy_matrix_from_results(exp_folder, thresholds=None, weights=None, 
     return accuracies
 
 
+def get_min_accuracy_matrix(accuracy_matrix, min_accuracy_matrix=None, thresholds=None, weights=None, is_good=None):
+
+    if is_good is None:
+        is_good = {"1.1.1.10": False, "1.1.1.11": True, "all":None}
+    if thresholds is None:
+        thresholds = [x / 10 for x in range(-10, 11)]
+    if weights is None:
+        weights = [x / 10 for x in range(0, 11)]
+
+    output = {}
+    for t in thresholds:
+        output[t] = {}
+        for w in weights:
+            output[t][w] = {}
+            for ip in is_good:
+                try:
+                    best_so_far = min_accuracy_matrix[t][w][ip]
+                except:
+                    best_so_far = 1.0
+                output[t][w][ip] = min(best_so_far, accuracy_matrix[t][w][ip])
+
+    return output
+
+
+def get_max_accuracy_matrix(accuracy_matrix, max_accuracy_matrix=None, thresholds=None, weights=None, is_good=None):
+
+    if is_good is None:
+        is_good = {"1.1.1.10": False, "1.1.1.11": True, "all":None}
+    if thresholds is None:
+        thresholds = [x / 10 for x in range(-10, 11)]
+    if weights is None:
+        weights = [x / 10 for x in range(0, 11)]
+
+    output = {}
+    for t in thresholds:
+        output[t] = {}
+        for w in weights:
+            output[t][w] = {}
+            for ip in is_good:
+                try:
+                    best_so_far = max_accuracy_matrix[t][w][ip]
+                except:
+                    best_so_far = 0.0
+                output[t][w][ip] = max(best_so_far, accuracy_matrix[t][w][ip])
+                if w > 0.95 and output[t][w][ip] > 0.75 and ip == "all":
+                    print(t, w, ip, output[t][w][ip])
+                    k = 3
+
+    return output
+
+
+def add_accuracies(a, b):
+    output = {}
+    for t in a.keys():  # threshold
+        output[t] = {}
+        for w in a[t].keys():  # weight
+            output[t][w] = {}
+            for ip in a[t][w].keys():  # ip
+                if a[t][w][ip] < 0.75:
+                    output[t][w][ip] = 0
+                else:
+                    output[t][w][ip] = round(a[t][w][ip] + b[t][w][ip], 4)
+
+    return output
+
 if __name__ == '__main__':
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1594842957.0396457/"
     # exp_suffix = "_badmouth_good_device"
