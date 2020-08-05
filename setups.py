@@ -11,7 +11,7 @@ from p2ptrust.testing.experiments.custom_devices.device_malicious_attack_target 
 from p2ptrust.testing.experiments.custom_devices.peer import Peer
 from p2ptrust.testing.experiments.custom_devices.peer_liar_everyone_is_good import PeerLiarEveryoneIsGood
 from p2ptrust.testing.experiments.custom_devices.peer_liar_target_is_bad import PeerLiarTargetIsBad
-from p2ptrust.testing.experiments.evaluator import compute_detection
+from p2ptrust.testing.experiments.evaluator import compute_prediction
 from p2ptrust.testing.experiments.output_processor import visualise_raw
 from p2ptrust.testing.experiments.utils import init_experiment, prepare_experiments_dir
 
@@ -423,14 +423,18 @@ def run_ips_sim_for_2b():
     #     time.sleep(10)
 
     # a directory dirname was created, all data is there
-    detections_in_peers = {}
+    predictions_in_peers = {}
+    scores_in_peers = {}
+    confidences_in_peers = {}
     colors = {}
     ips = []
     cmap = matplotlib.cm.get_cmap('OrRd')
     for peer_id in range(1, 10):
         peer_ip = "1.1.1." + str(peer_id)
         colors[peer_ip] = cmap(peer_id / 15 + 0.3)
-        detections_in_peers[peer_ip] = []
+        predictions_in_peers[peer_ip] = []
+        scores_in_peers[peer_ip] = []
+        confidences_in_peers[peer_ip] = []
         ips.append(peer_ip)
         exp_file = dirname + timestamp + "/" + str(peer_id) + exp_name + "round_results.txt"
         with open(exp_file, "r") as f:
@@ -438,14 +442,20 @@ def run_ips_sim_for_2b():
             rounds = sorted(list(map(int, data.keys())))
             for r in rounds:
                 net_score, net_confidence, score, confidence = data[str(r)]["1.1.1.0"]["1.1.1.10"]
-                detection = compute_detection(net_score, net_confidence, score, confidence, 1)
-                detections_in_peers[peer_ip].append(detection)
+                prediction = compute_prediction(net_score, net_confidence, score, confidence, 1)
+                predictions_in_peers[peer_ip].append(prediction)
+                scores_in_peers[peer_ip].append(score)
+                confidences_in_peers[peer_ip].append(confidence)
 
     line_widths = {ip: 2 for ip in ips}
     alphas = {ip: 1 for ip in ips}
     labels = {ip: ip for ip in ips}
 
-    visualise_raw(detections_in_peers, ips, rounds, colors, line_widths, alphas, labels)
+    print(predictions_in_peers)
+    print(scores_in_peers)
+    print(confidences_in_peers)
+
+    visualise_raw(predictions_in_peers, ips, rounds, colors, line_widths, alphas, labels)
 
 
 if __name__ == '__main__':
@@ -454,5 +464,6 @@ if __name__ == '__main__':
     s = Setups("")
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
-    s.run_3c(dirname, missing_setups)
+    # s.run_3c(dirname, missing_setups)
+    run_ips_sim_for_2b()
     # s.run_4(dirname)

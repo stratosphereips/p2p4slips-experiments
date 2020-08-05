@@ -12,7 +12,7 @@ def visualise(detection_data):
     colors = {"1.1.1.10": "red", "1.1.1.11": "forestgreen"}
     linewidths = {"1.1.1.10": 5, "1.1.1.11": 2}
     alphas = {"1.1.1.10": 0.8, "1.1.1.11": 1.0}
-    labels = {"1.1.1.10": "1.1.1.10", "1.1.1.11": "1.1.1.11"}
+    labels = {"1.1.1.10": "Malicious Device", "1.1.1.11": "Benign Device"}
 
     ips_raw_detections = {ip: [detection_data[t][ip][0] for t in rounds] for ip in observed_ips}
     # print(ips_raw_detections)
