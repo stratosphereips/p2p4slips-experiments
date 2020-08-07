@@ -106,7 +106,7 @@ def find_best_threshold_long_table(observation_results: dict):
         print("\\hline")
 
 
-def create_enormous_table(data, skip_individual_ips=False, verbose=True, scale=1, param_weight=-2, param_threshold=-2, param_name=""):
+def create_enormous_table(data, skip_individual_ips=False, verbose=False, scale=1, param_weight=-2, param_threshold=-2, param_name=""):
 
     output_lines = []
 
@@ -117,6 +117,9 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True, scale=1
     ip_names = {"1.1.1.10": "1.1.1.10", "1.1.1.11": "1.1.1.11", "all": "All"}
     cline = "\\cline{2-" + str(len(thresholds) + 2) + "}"
     thickhline = "\\thickhline"
+    thickhline = "\\hline"
+    thick_column_separator = "\""
+    thick_column_separator = "|"
 
     # prepare table width
     if skip_individual_ips:
@@ -127,7 +130,7 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True, scale=1
     scaling = "\\resizebox{\\textwidth}{!}{"
     output_lines.append(scaling)
 
-    column_specs = "\\begin{tabular}{|c" + one_more_column + "\"" + ("c|" * len(thresholds)) + "}"
+    column_specs = "\\begin{tabular}{|c" + one_more_column + thick_column_separator + ("c|" * len(thresholds)) + "}"
     output_lines.append(column_specs)
 
     output_lines.append(thickhline)
@@ -136,7 +139,7 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True, scale=1
     if skip_individual_ips:
         header = "\\backslashbox{$w$}{$T$} & " + "".join([str(t) + " & " for t in thresholds])[:-2] + "\\\\"
     else:
-        header = "\\multicolumn{2}{|c\"}{\\backslashbox[26mm]{$w$}{$T$}} & " + "".join(
+        header = "\\multicolumn{2}{|" + thick_column_separator + "}{\\backslashbox[26mm]{$w$}{$T$}} & " + "".join(
             [str(t) + " & " for t in thresholds])[:-2] + "\\\\"
     output_lines.append(header)
 
@@ -164,7 +167,8 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=True, scale=1
                 if ip == "all":
                     lines[ip] += " & " + get_cell_color(data[t][w][ip], True, scale=scale) + " " + str(data[t][w][ip])
                     if t == param_threshold and w == param_weight and data[t][w][ip] >= 0.75:
-                        print(param_name, data[t][w][ip])
+                        # print(param_name, data[t][w][ip])
+                        pass
                 else:
                     if not skip_individual_ips:
                         lines[ip] += " & " + str(data[t][w][ip])

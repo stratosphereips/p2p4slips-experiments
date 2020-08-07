@@ -269,22 +269,21 @@ class Setups:
 
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_3c")
 
-        for n_good_peers in range(5, 10):
-            for n_victims in range(1, 10):
-                exp_id = 10*n_good_peers + n_victims
-        if True:
-            for exp_id in missing_setups:
-                attack_plan = get_attack_plan_with_given_victim_count(n_rounds=20, n_victims=n_victims)
-                ctrl = self.attack_parametrised(base_dir,
-                                                exp_id=exp_id,
-                                                n_good_peers=n_good_peers,
-                                                n_peers=10,
-                                                n_rounds=20,
-                                                attack_plan=attack_plan,
-                                                bad_peer_type="PeerLiarEveryoneIsGood",
-                                                experiment_suffix="")
-                ctrl.run_experiment()
-                time.sleep(5)
+        for n_good_peers in range(3, 9):
+            n_victims = n_good_peers
+
+            exp_id = 10*n_good_peers + n_victims
+            attack_plan = get_attack_plan_with_given_victim_count(n_rounds=20, n_victims=n_victims)
+            ctrl = self.attack_parametrised(base_dir,
+                                            exp_id=exp_id,
+                                            n_good_peers=n_good_peers,
+                                            n_peers=10,
+                                            n_rounds=20,
+                                            attack_plan=attack_plan,
+                                            bad_peer_type="PeerLiarEveryoneIsGood",
+                                            experiment_suffix="")
+            ctrl.run_experiment()
+            time.sleep(5)
 
     def run_4a(self, dir_prefix):
         # badmouthing
@@ -465,5 +464,6 @@ if __name__ == '__main__':
     # s.run_test_experiments(dirname)
     # s.run_2b(dirname)
     # s.run_3c(dirname, missing_setups)
-    run_ips_sim_for_2b()
+    # run_ips_sim_for_2b()
     # s.run_4(dirname)
+    s.run_3c(dirname)

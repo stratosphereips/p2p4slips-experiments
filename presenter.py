@@ -6,10 +6,11 @@ from p2ptrust.testing.experiments.evaluator import get_accuracy_matrix_from_resu
 from p2ptrust.testing.experiments.output_processor import create_enormous_table, lists_to_table
 
 
-def generate_tables():
+def generate_tables(experiments=None):
     exp_location = "/home/dita/p2ptrust-experiments-link/experiment_outputs/"
     exp_prefix = "exp"
-    experiments = ["2a", "2b", "2c", "3a", "3b", "4a"]
+    if experiments is None:
+        experiments = ["2a", "2b", "2c", "3a", "3b", "4a"]
 
     tables_output_location = "/home/dita/p2ptrust-experiments-link/experiment_outputs/tables/"
     tables_output_name = tables_output_location + "output_combined.tex"
@@ -33,7 +34,7 @@ def generate_tables():
         except IndexError:
             continue
 
-        subfolders = exp_folder_walk[1]
+        subfolders = sorted(exp_folder_walk[1])
         for subfolder_name in subfolders:
 
             if int(subfolder_name) < 6:
@@ -78,15 +79,19 @@ def generate_tables():
     file.close()
 
 
-def generate_table_imports(exp_base="2c", iter1=None, iter2=None, long=False):
+def generate_table_imports(exp_base="2c", iter1=None, iter2=None, blacklist=None, long=False):
     if iter1 is None:
         iter1 = [str(i) for i in range(1, 10)]
     if iter2 is None:
         iter2 = [""]
+    if blacklist is None:
+        blacklist = []
 
     output_lines = []
     for i in iter1:
         for j in iter2:
+            if i + j in blacklist:
+                continue
             exp_name = exp_base + i + j
 
             if long:
@@ -128,10 +133,12 @@ def explore_4a3():
     accuracy_matrix = get_accuracy_matrix_from_results(exp_location)
 
 
-show_best_params()
+# show_best_params()
 # explore_4a3()
 
 # generate_tables()
 # generate_table_imports(exp_base="3b", long=False)
 # generate_table_imports(exp_base="4a", long=False)
 # generate_table_imports(exp_base="4a", long=True)
+generate_tables(experiments=["3c"])
+generate_table_imports(exp_base="3c", iter1=["11", "12", "13", "14", "15", "16", "17", "18", "22", "23", "24", "25", "26", "27", "28", "33", "34", "35", "36", "37", "38", "44", "45", "46", "47", "48", "55", "56", "57", "58", "66", "67", "68", "77", "78", "88"])

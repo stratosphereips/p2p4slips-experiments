@@ -292,7 +292,7 @@ def get_max_accuracy_matrix(accuracy_matrix, max_accuracy_matrix=None, threshold
                     best_so_far = 0.0
                 output[t][w][ip] = max(best_so_far, accuracy_matrix[t][w][ip])
                 if w > 0.95 and output[t][w][ip] > 0.75 and ip == "all":
-                    print(t, w, ip, output[t][w][ip])
+                    # print(t, w, ip, output[t][w][ip])
                     k = 3
 
     return output
