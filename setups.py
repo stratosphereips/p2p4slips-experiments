@@ -340,7 +340,11 @@ class Setups:
         base_dir = prepare_experiments_dir(dir_prefix, exp_name="_exp_5a")
 
         # prepare attack plan for the malicious device and peers
-        mp_attack_plan = {i: ["1.1.1.0"] for i in range(0, 20)}
+        mp_attack_plan = {}
+        for i in range(0, 20):
+            mp_attack_plan[i] = []
+            if i > 4:
+                mp_attack_plan[i].append("1.1.1.0")
         attack_plan = get_two_part_attack_plan(n_rounds=20, n_peers=10)
         badmouthing_targets = ["1.1.1.11"]
 
