@@ -117,9 +117,9 @@ def create_enormous_table(data, skip_individual_ips=False, verbose=False, scale=
     ip_names = {"1.1.1.10": "1.1.1.10", "1.1.1.11": "1.1.1.11", "all": "All"}
     cline = "\\cline{2-" + str(len(thresholds) + 2) + "}"
     thickhline = "\\thickhline"
-    thickhline = "\\hline"
+    # thickhline = "\\hline"
     thick_column_separator = "\""
-    thick_column_separator = "|"
+    # thick_column_separator = "|"
 
     # prepare table width
     if skip_individual_ips:

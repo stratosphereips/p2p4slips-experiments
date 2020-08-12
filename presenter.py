@@ -37,10 +37,6 @@ def generate_tables(experiments=None):
         subfolders = sorted(exp_folder_walk[1])
         for subfolder_name in subfolders:
 
-            if int(subfolder_name) < 6:
-                if not exp_suffix.startswith("2"):
-                    continue
-
             # print("Generating tables for experiment %s, run %s" % (exp_suffix, subfolder_name))
             subfolder = exp_folder + "/" + subfolder_name
             accuracy_matrix = get_accuracy_matrix_from_results(subfolder)
@@ -125,6 +121,9 @@ def show_best_params():
             ["3A9", "0.925", "0.925", "0.9"], ["3B6", "0.825", "0.8", "0.775"], ["3B7", "0.85", "0.825", "0.775"],
             ["3B8", "0.85", "0.825", "0.775"], ["3B9", "0.875", "0.825", "0.775"], ["4A6", "0.8", "0.775", "0.775"],
             ["4A7", "0.875", "0.85", "0.8"], ["4A8", "0.9", "0.9", "0.85"], ["4A9", "0.9", "0.9", "0.9"]]
+
+    # transpose:
+    data = list(map(list, zip(*data)))
     lists_to_table(data)
 
 
@@ -133,12 +132,14 @@ def explore_4a3():
     accuracy_matrix = get_accuracy_matrix_from_results(exp_location)
 
 
-# show_best_params()
+show_best_params()
 # explore_4a3()
 
 # generate_tables()
 # generate_table_imports(exp_base="3b", long=False)
 # generate_table_imports(exp_base="4a", long=False)
 # generate_table_imports(exp_base="4a", long=True)
-generate_tables(experiments=["3c"])
-generate_table_imports(exp_base="3c", iter1=["11", "12", "13", "14", "15", "16", "17", "18", "22", "23", "24", "25", "26", "27", "28", "33", "34", "35", "36", "37", "38", "44", "45", "46", "47", "48", "55", "56", "57", "58", "66", "67", "68", "77", "78", "88"])
+# generate_tables(experiments=["3c"])
+# generate_table_imports(exp_base="3c", iter1=["11", "12", "13", "14", "15", "16", "17", "18", "22", "23", "24", "25", "26", "27", "28", "33", "34", "35", "36", "37", "38", "44", "45", "46", "47", "48", "55", "56", "57", "58", "66", "67", "68", "77", "78", "88"])
+# generate_tables(experiments=["5a"])
+# generate_table_imports(exp_base="5a")

@@ -414,6 +414,57 @@ def plot_ips_demo():
     visualise_ips(detections, scores, confidences, ips, rounds, colors, labels)
 
 
+def visualise_ips_and_omega_in_experiment(exp_name, subfolder_name, ips_weight):
+    data_folder = "/home/dita/p2ptrust-experiments-link/experiment_outputs/exp_" + exp_name + "/" + subfolder_name
+
+    data_file = data_folder + "/round_results.txt"
+
+    rounds = list(range(0, 20))
+    detections = {"1.1.1.10": [], "1.1.1.11": []}
+    omegas = {"1.1.1.10": [], "1.1.1.11": []}
+    predictions = {"1.1.1.10": [], "1.1.1.11": []}
+    with open(data_file, "r") as f:
+        data = json.load(f)
+        for round in data.keys():
+            rnd_data = data[round]
+            for observer in rnd_data.keys():
+                for observed_ip in rnd_data[observer].keys():
+                    net_score, net_confidence, score, confidence = rnd_data[observer][observed_ip]
+                    ips_detection = score * confidence
+                    omega = net_confidence * net_score
+                    prediction = compute_prediction(net_score, net_confidence, score, confidence, ips_weight)
+                    detections[observed_ip].append(ips_detection)
+                    omegas[observed_ip].append(omega)
+                    predictions[observed_ip].append(prediction)
+
+        colors = {"1.1.1.10": "red", "1.1.1.11": "green"}
+        label_suffix = {"1.1.1.10": "malicious device", "1.1.1.11": "benign device"}
+        for ip in ["1.1.1.11", "1.1.1.10"]:
+            matplotlib.pyplot.plot(rounds,
+                                   omegas[ip],
+                                   color=colors[ip],
+                                   linestyle=":",
+                                   label="$\\Omega$ for the " + label_suffix[ip])
+            matplotlib.pyplot.plot(rounds,
+                                   detections[ip],
+                                   color=colors[ip],
+                                   linestyle="--",
+                                   label="Detection for the " + label_suffix[ip])
+            if 0 <= ips_weight <= 1:
+                matplotlib.pyplot.plot(rounds,
+                                       predictions[ip],
+                                       color=colors[ip],
+                                       label="Prediction for the " + label_suffix[ip])
+        matplotlib.pyplot.ylim(-1.05, 1.05)
+        matplotlib.pyplot.xticks(list(range(0, 20)))
+        matplotlib.pyplot.grid(True)
+        matplotlib.pyplot.gca().set_aspect(4.5)
+        matplotlib.pyplot.xlabel('Experiment rounds')
+        matplotlib.pyplot.ylabel('IPS detections, $\\Omega$ and predictions')
+        matplotlib.pyplot.legend()
+        matplotlib.pyplot.show()
+
+
 def visualise_ips(detections, scores, confidences, ips, rounds, colors, labels):
 
     for ip in ips:
@@ -456,7 +507,7 @@ if __name__ == '__main__':
     # exp_2b_get_attack_curves()
 
     # generate_prediction_graph_for_2a()
-    plot_ips_demo()
+    # plot_ips_demo()
 
     # exp_dir = "/home/dita/p2ptrust-experiments-link/experiment_data/experiments-1595605824.1189618/"
     # exp_suffix = "_attacker_targeting_different_amounts_of_peers"
@@ -484,3 +535,5 @@ if __name__ == '__main__':
     #             accuracies[threshold].append(accuracy)
     #
     # find_best_threshold(accuracies)
+
+    visualise_ips_and_omega_in_experiment("5a", "1", -1)
