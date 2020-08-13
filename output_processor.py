@@ -32,8 +32,8 @@ def visualise_raw(ips_raw_detections, ips, rounds, colors, linewidths, alphas, l
     matplotlib.pyplot.xticks(list(range(0, 20)))
     matplotlib.pyplot.grid(True)
     matplotlib.pyplot.gca().set_aspect(4.5)
-    matplotlib.pyplot.xlabel('Algorithm rounds')
-    matplotlib.pyplot.ylabel('IPS detection')
+    matplotlib.pyplot.xlabel('Experiment rounds')
+    matplotlib.pyplot.ylabel('IPS_detection')
     matplotlib.pyplot.legend()
     matplotlib.pyplot.show()
 

@@ -456,58 +456,6 @@ class Setups:
         return ctrl
 
 
-def run_ips_sim_for_2b():
-    exp_name = "_ips_sim"
-    timestamp = str(time.time())
-    timestamp = "1595842634.7445016"
-    # for peer_id in range(1, 10):
-    #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
-    #     s = Setups(base_dir)
-    #     attack_plan = {}
-    #     for i in range(0, 20):
-    #         targets = []
-    #         if abs(peer_id - i) <= 1:
-    #             targets.append("1.1.1.0")
-    #         attack_plan[i] = targets
-    #     ctrl = s.attack_observer_no_peers(queue, config, exp_id=peer_id, attack_plan=attack_plan, exp_name=exp_name)
-    #     ctrl.run_experiment_ids_only()
-    #     queue_thread.kill()
-    #     time.sleep(10)
-
-    # a directory dirname was created, all data is there
-    predictions_in_peers = {}
-    scores_in_peers = {}
-    confidences_in_peers = {}
-    colors = {}
-    ips = []
-    cmap = matplotlib.cm.get_cmap('OrRd')
-    for peer_id in range(1, 10):
-        peer_ip = "1.1.1." + str(peer_id)
-        colors[peer_ip] = cmap(peer_id / 15 + 0.3)
-        predictions_in_peers[peer_ip] = []
-        scores_in_peers[peer_ip] = []
-        confidences_in_peers[peer_ip] = []
-        ips.append(peer_ip)
-        exp_file = dirname + timestamp + "/" + str(peer_id) + exp_name + "round_results.txt"
-        with open(exp_file, "r") as f:
-            data = json.load(f)
-            rounds = sorted(list(map(int, data.keys())))
-            for r in rounds:
-                net_score, net_confidence, score, confidence = data[str(r)]["1.1.1.0"]["1.1.1.10"]
-                prediction = compute_prediction(net_score, net_confidence, score, confidence, 1)
-                predictions_in_peers[peer_ip].append(prediction)
-                scores_in_peers[peer_ip].append(score)
-                confidences_in_peers[peer_ip].append(confidence)
-
-    line_widths = {ip: 2 for ip in ips}
-    alphas = {ip: 1 for ip in ips}
-    labels = {ip: ip for ip in ips}
-
-    print(predictions_in_peers)
-    print(scores_in_peers)
-    print(confidences_in_peers)
-
-    visualise_raw(predictions_in_peers, ips, rounds, colors, line_widths, alphas, labels)
 
 
 if __name__ == '__main__':
@@ -520,4 +468,4 @@ if __name__ == '__main__':
     # run_ips_sim_for_2b()
     # s.run_4(dirname)
     # s.run_3c(dirname)
-    s.run_5a(dirname)
+    # s.run_5a(dirname)

@@ -7,9 +7,6 @@ from p2ptrust.testing.experiments.output_processor import visualise, find_best_t
     create_enormous_table, visualise_raw
 
 
-# from p2ptrust.testing.experiments.setups import Setups
-# from p2ptrust.testing.experiments.utils import init_experiments
-
 
 def compute_prediction(nscore, nconfidence, score, confidence, weight_ips):
     prediction = ((1 - weight_ips) * (nscore * nconfidence)) + (weight_ips * (score * confidence))
@@ -444,12 +441,12 @@ def visualise_ips_and_omega_in_experiment(exp_name, subfolder_name, ips_weight):
                                    omegas[ip],
                                    color=colors[ip],
                                    linestyle=":",
-                                   label="$\\Omega$ for the " + label_suffix[ip])
+                                   label="P2P_detection for the " + label_suffix[ip])
             matplotlib.pyplot.plot(rounds,
                                    detections[ip],
                                    color=colors[ip],
                                    linestyle="--",
-                                   label="Detection for the " + label_suffix[ip])
+                                   label="IPS_detection for the " + label_suffix[ip])
             if 0 <= ips_weight <= 1:
                 matplotlib.pyplot.plot(rounds,
                                        predictions[ip],
@@ -460,7 +457,7 @@ def visualise_ips_and_omega_in_experiment(exp_name, subfolder_name, ips_weight):
         matplotlib.pyplot.grid(True)
         matplotlib.pyplot.gca().set_aspect(4.5)
         matplotlib.pyplot.xlabel('Experiment rounds')
-        matplotlib.pyplot.ylabel('IPS detections, $\\Omega$ and predictions')
+        matplotlib.pyplot.ylabel('IPS_detections, P2P_detections and predictions')
         matplotlib.pyplot.legend()
         matplotlib.pyplot.show()
 
@@ -471,7 +468,7 @@ def visualise_ips(detections, scores, confidences, ips, rounds, colors, labels):
         matplotlib.pyplot.plot(rounds,
                                detections[ip],
                                color=colors[ip],
-                               label="Detection")
+                               label="IPS_detection")
         matplotlib.pyplot.plot(rounds,
                                scores[ip],
                                color="red",
@@ -486,10 +483,87 @@ def visualise_ips(detections, scores, confidences, ips, rounds, colors, labels):
     matplotlib.pyplot.xticks(list(range(0, 20)))
     matplotlib.pyplot.grid(True)
     matplotlib.pyplot.gca().set_aspect(4.5)
-    matplotlib.pyplot.xlabel('Algorithm rounds')
-    matplotlib.pyplot.ylabel('IPS detection')
+    matplotlib.pyplot.xlabel('Experiments rounds')
+    matplotlib.pyplot.ylabel('IPS_detection, score, confidence')
     matplotlib.pyplot.legend()
     matplotlib.pyplot.show()
+
+
+def run_ips_sim_for_2b():
+    exp_name = "_ips_sim"
+    timestamp = str(time.time())
+    timestamp = "1595842634.7445016"
+    # for peer_id in range(1, 10):
+    #     config, queue, queue_thread, base_dir = init_experiments(dirname, timestamp=timestamp)
+    #     s = Setups(base_dir)
+    #     attack_plan = {}
+    #     for i in range(0, 20):
+    #         targets = []
+    #         if abs(peer_id - i) <= 1:
+    #             targets.append("1.1.1.0")
+    #         attack_plan[i] = targets
+    #     ctrl = s.attack_observer_no_peers(queue, config, exp_id=peer_id, attack_plan=attack_plan, exp_name=exp_name)
+    #     ctrl.run_experiment_ids_only()
+    #     queue_thread.kill()
+    #     time.sleep(10)
+
+    # a directory dirname was created, all data is there
+    predictions_in_peers = {}
+    scores_in_peers = {}
+    confidences_in_peers = {}
+    colors = {}
+    ips = []
+    cmap = matplotlib.cm.get_cmap('OrRd')
+    for peer_id in range(1, 10):
+        peer_ip = "1.1.1." + str(peer_id)
+        colors[peer_ip] = cmap(peer_id / 15 + 0.3)
+        predictions_in_peers[peer_ip] = []
+        scores_in_peers[peer_ip] = []
+        confidences_in_peers[peer_ip] = []
+        ips.append(peer_ip)
+        exp_file = dirname + timestamp + "/" + str(peer_id) + exp_name + "round_results.txt"
+        with open(exp_file, "r") as f:
+            data = json.load(f)
+            rounds = sorted(list(map(int, data.keys())))
+            for r in rounds:
+                net_score, net_confidence, score, confidence = data[str(r)]["1.1.1.0"]["1.1.1.10"]
+                prediction = compute_prediction(net_score, net_confidence, score, confidence, 1)
+                predictions_in_peers[peer_ip].append(prediction)
+                scores_in_peers[peer_ip].append(score)
+                confidences_in_peers[peer_ip].append(confidence)
+
+    line_widths = {ip: 2 for ip in ips}
+    alphas = {ip: 1 for ip in ips}
+    labels = {ip: ip for ip in ips}
+
+    print(predictions_in_peers)
+    print(scores_in_peers)
+    print(confidences_in_peers)
+
+    visualise_raw(predictions_in_peers, ips, rounds, colors, line_widths, alphas, labels)
+
+
+def make_all_graphs():
+    # 05-ips-simulation-2.pdf
+    plot_ips_demo()
+
+    #07-exp1-ips-only-1.pdf
+    eval_exp_2a_no_malicious()
+
+    # 07-exp2a-ips-in-other-peers.pdf
+    exp_2a_get_attack_curves()
+
+    # 07-exp2a-t0-w04.pdf
+    generate_prediction_graph_for_2a()
+
+    # 07-exp2b-ips-in-all-peers.pdf
+    run_ips_sim_for_2b()
+
+    # 07-exp5a1.pdf
+    visualise_ips_and_omega_in_experiment("5a", "1", -1)
+
+    # 07-exp4a6-hole-explanation.pdf
+    visualise_ips_and_omega_in_experiment("4a", "6", 0.3)
 
 
 if __name__ == '__main__':
@@ -536,4 +610,5 @@ if __name__ == '__main__':
     #
     # find_best_threshold(accuracies)
 
-    visualise_ips_and_omega_in_experiment("5a", "1", -1)
+    # exp_2a_get_attack_curves()
+
