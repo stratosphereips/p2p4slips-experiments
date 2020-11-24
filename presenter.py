@@ -132,14 +132,15 @@ def explore_4a3():
     accuracy_matrix = get_accuracy_matrix_from_results(exp_location)
 
 
-show_best_params()
-# explore_4a3()
+if __name__ == '__main__':
+    show_best_params()
+    # explore_4a3()
 
-# generate_tables()
-# generate_table_imports(exp_base="3b", long=False)
-# generate_table_imports(exp_base="4a", long=False)
-# generate_table_imports(exp_base="4a", long=True)
-# generate_tables(experiments=["3c"])
-# generate_table_imports(exp_base="3c", iter1=["11", "12", "13", "14", "15", "16", "17", "18", "22", "23", "24", "25", "26", "27", "28", "33", "34", "35", "36", "37", "38", "44", "45", "46", "47", "48", "55", "56", "57", "58", "66", "67", "68", "77", "78", "88"])
-# generate_tables(experiments=["5a"])
-# generate_table_imports(exp_base="5a")
+    # generate_tables()
+    # generate_table_imports(exp_base="3b", long=False)
+    # generate_table_imports(exp_base="4a", long=False)
+    # generate_table_imports(exp_base="4a", long=True)
+    # generate_tables(experiments=["3c"])
+    # generate_table_imports(exp_base="3c", iter1=["11", "12", "13", "14", "15", "16", "17", "18", "22", "23", "24", "25", "26", "27", "28", "33", "34", "35", "36", "37", "38", "44", "45", "46", "47", "48", "55", "56", "57", "58", "66", "67", "68", "77", "78", "88"])
+    # generate_tables(experiments=["5a"])
+    # generate_table_imports(exp_base="5a")
