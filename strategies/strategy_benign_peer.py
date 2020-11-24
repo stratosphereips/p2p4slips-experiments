@@ -1,6 +1,6 @@
-from sampler import Attack
-from strategies.basic_strategy import Strategy
-from utils import NetworkUpdate
+from modules.p2ptrust.testing.experiments.sampler import Attack
+from modules.p2ptrust.testing.experiments.strategies.basic_strategy import Strategy
+from modules.p2ptrust.testing.experiments.utils import NetworkUpdate
 
 
 class StrategyBenignPeer(Strategy):

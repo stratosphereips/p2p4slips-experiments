@@ -1,6 +1,4 @@
 # a simple strategy
-from sampler import Attack
-from utils import NetworkUpdate
 
 
 class Strategy:

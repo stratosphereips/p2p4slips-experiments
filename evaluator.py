@@ -483,7 +483,7 @@ def visualise_ips(detections, scores, confidences, ips, rounds, colors, labels):
     matplotlib.pyplot.xticks(list(range(0, 20)))
     matplotlib.pyplot.grid(True)
     matplotlib.pyplot.gca().set_aspect(4.5)
-    matplotlib.pyplot.xlabel('Experiments rounds')
+    matplotlib.pyplot.xlabel('Experiment rounds')
     matplotlib.pyplot.ylabel('IPS_detection, score, confidence')
     matplotlib.pyplot.legend()
     matplotlib.pyplot.show()
@@ -513,6 +513,8 @@ def run_ips_sim_for_2b():
     confidences_in_peers = {}
     colors = {}
     ips = []
+    # TODO fix dirname
+    dirname=""
     cmap = matplotlib.cm.get_cmap('OrRd')
     for peer_id in range(1, 10):
         peer_ip = "1.1.1." + str(peer_id)
@@ -611,4 +613,5 @@ if __name__ == '__main__':
     # find_best_threshold(accuracies)
 
     # exp_2a_get_attack_curves()
+    plot_ips_demo()
 
